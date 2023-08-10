@@ -1,0 +1,31 @@
+---
+title: "QUT HPC Manual"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## QUT HPC Manual
+
+This document stands as a stripped back manual for successfully operating the Queensland University of Technologies (QUT) High Performance Computing (HPC) system. 
+
+- spaces matter
+
+## Run in an interactive session
+
+```{bash eval = FALSE}
+qsub -I -S /bin/bash -l walltime=2:00:00,ncpus=4,mem=50gb
+logout # when finished
+```
+
+## Monitoring the status of jobs
+
+The below command provides a summary of the current jobs and their status. 
+
+```{bash eval = FALSE}
+qstat -u n9401849
+```
+
+

@@ -3,3 +3,4 @@ data/
 *.Rproj
 .Rhistory
 *.rds
+onHPC/outputs/
