@@ -10,12 +10,11 @@ library(Matrix)
 library(HDInterval)
 
 # Load functions and maps
-base_loc <- "WADOH/r_src/"
-source(paste0(base_loc, "functions.R"))
-load(paste0(base_loc, "mappopDATA.Rdata"))
+source(paste0(base_folder, "/r_src/functions.R"))
+load(paste0(base_folder, "/data/mappopDATA.Rdata"))
 
 ## Run file ## ----------------------------------------------------------------
-source(paste0(base_loc, Rfile, ".R"))
+source(paste0(base_loc, "/r_src/", model_file, ".R"))
 
 
 
