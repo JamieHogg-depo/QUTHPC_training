@@ -1,7 +1,11 @@
 ## Model 1 ## -----------------------------------------------------------------
 
 # load data
-data <- readRDS(file = paste0(base_loc, "/data/", Rfile, ".rds"))
+data <- readRDS(file = paste0(base_folder, "/data/", model_spec, "_", condition, ".rds"))
+
+# filter
+data <- data %>% 
+  filter(sex == sex)
 
 ## Setup model ## -------------------------------------------------------------
 
@@ -22,15 +26,15 @@ code <- nimbleCode({
 	res[1:N] <- y[1:N] - mu[1:N]
 })
 
-nD <- list(data$y = y,
-			data$x = x)
-nC <- list(N = nrow(N))
+nD <- list(y = data$y,
+           x = data$x)
+nC <- list(N = nrow(data))
 nI <- function(){list(Beta = rnorm(1),
-			  alpha = rnorm(1),
-			  sigma = runif(1, 0.1, 2))}
+                      alpha = rnorm(1),
+                      sigma = runif(1, 0.1, 2))}
 monitors <- c("alpha", "Beta", "sigma", "mu", "res")
 
-## Fit and save the model ## -------------------------------------------------
+## Fit and save the model ## ---------------------------------------------------
 
 mod <- jf$runNimble(code = code, 
                            nD = nD,
@@ -73,9 +77,10 @@ mf_cv_ll$traceplot <- mcmc_trace(as.list(fit$fit$samples), pars = c("alpha", "Be
 res_draws <- jf$getSubsetDrawsNimble(as.matrix(fit$fit$samples), "res\\[")
 fitted_draws <- jf$getSubsetDrawsNimble(as.matrix(fit$fit$samples), "mu\\[")
 
-mf_cv_ll$resplot <- ggplot(data = NULL, 
-aes(y = apply(res_draws, 2, median), 
-x = apply(fitted_draws, 2, median)))+
+mf_cv_ll$resplot <- 
+ggplot(data = NULL, 
+       aes(y = apply(res_draws, 2, median), 
+           x = apply(fitted_draws, 2, median)))+
   theme_bw()+
   geom_hline(yintercept = 0)+
   geom_point()+
@@ -86,11 +91,11 @@ x = apply(fitted_draws, 2, median)))+
 res_draws <- jf$getSubsetDrawsNimble(as.matrix(fit$fit$samples), "res\\[")
 fitted_draws <- jf$getSubsetDrawsNimble(as.matrix(fit$fit$samples), "mu\\[")
 
-mf_cv_ll$fittedplot <- ggplot(data = NULL, 
-aes(y = data$y, 
-x = apply(fitted_draws, 2, median)))+
+mf_cv_ll$fittedplot <- 
+ggplot(data = NULL, aes(y = data$y, 
+                        x = apply(fitted_draws, 2, median)))+
   theme_bw()+
-  geom_hline(yintercept = 0)+
+  geom_abline()+
   geom_point()+
   labs(y = "Observed", 
        x = "Fitted values")
@@ -101,13 +106,13 @@ saveRDS(mf_cv_ll, file = paste0(base_folder, "/outputs/", cur_date, "/r/", Rfile
 ## Summarise draws ## ---------------------------------------------------------
 
 results1 <- jf$getResultsData(fitted_draws, 
-							model = Rfile, 
-							metric = "standard")
+                              model = paste0(condition, "_", sex), 
+                              metric = "standard")
 saveRDS(results1, file = paste0(base_folder, "/outputs/", cur_date, "/r/", Rfile, "_results1.rds"))
 							
 results2 <- jf$getResultsData(exp(fitted_draws), 
-model = Rfile, 
-							metric = "exponentiated")
+                              model = paste0(condition, "_", sex), 
+                              metric = "exponentiated")
 saveRDS(results2, file = paste0(base_folder, "/outputs/", cur_date, "/r/", Rfile, "_results2.rds"))
 
 ## END SCRIPT ## --------------------------------------------------------------
