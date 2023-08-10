@@ -3,7 +3,7 @@
 base_folder='QUTHPC_training/onHPC'
 
 # Model
-for model_spec in model1 model2
+for model_spec in model1 #model2
 	do
 	
 # Sex
@@ -58,6 +58,10 @@ EOF
 
 	# run each script
 		qsub $base_folder/sub_src/$cur_date/$file
+
+done
+
+done
 
 done
 			
