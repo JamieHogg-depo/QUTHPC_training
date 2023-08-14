@@ -18,8 +18,8 @@ code <- nimbleCode({
 	}
 
 	# Priors
-	alpha ~ dnorm(0, sd = 100)
-	Beta ~ dnorm(0, sd = 100)
+	alpha ~ dnorm(0, sd = 1)
+	Beta ~ dnorm(0, sd = 1)
 	sigma ~ dgamma(2, 0.5)
 	
 	# residuals
