@@ -1,6 +1,8 @@
 ---
 title: "QUT HPC Manual"
-output: pdf_document
+output:
+  html_document:
+    highlight: tango
 ---
 
 ```{r setup, include=FALSE}
@@ -9,15 +11,71 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## QUT HPC Manual
 
-This document stands as a stripped back manual for successfully operating the Queensland University of Technologies (QUT) High Performance Computing (HPC) system. 
+This document stands as a stripped back manual for successfully operating the Queensland University of Technologies (QUT) High Performance Computing (HPC) system for staff at the DOHWA. 
 
+## Background
+
+- I won't try to explain or teach Unix/Bash code
+- I am not a programmer
 - spaces matter
+- Fantastic resources by Ethan Goan
 
-## Run in an interactive session
+## Logging in for the first time 
 
-```{bash eval = FALSE}
-qsub -I -S /bin/bash -l walltime=2:00:00,ncpus=4,mem=50gb
-logout # when finished
+Open command prompt and type
+
+```{bash, eval=FALSE}
+ssh <your_qut_id>@lyra.qut.edu.au
+```
+
+where you will replace `<your_qut_id>` with your personal QUT ID. Then hit ENTER. The console will then prompt you to enter your password. 
+**IMPORTANT**: *While typing your password, the console will not show you any dots. It will appear as if the console is not recognizing that you're inputting your password. Be assured that it is.* 
+
+Once you've typed you password and hit ENTER you will now be inside the lyra head node. Your screen might look something like the one below. 
+
+```{bash, eval=FALSE}
+C:\Users\n9401849>ssh n9401849@lyra.qut.edu.au
+* ============================================================================ +
+* Access to this computer system is only for authorised QUT staff and students *
+* and external persons authorised by QUT.                                      *
+* ---------------------------------------------------------------------------- *
+* WARNING:        It is a criminal offence to:                                 *
+*                 i.  Obtain access to data without authority.                 *
+*                 ii. Damage, delete, alter or insert data without authority.  *
+* ---------------------------------------------------------------------------- *
+* Communications on or through QUT's computer systems are monitored and        *
+* recorded to secure effective system operation and for other lawful purposes. *
++ ============================================================================ +
+
++ --------- Please login using your QUT Access Username and Password --------- +
+
+n9401849@lyra.qut.edu.au's password:
+Last login: Tue Aug 15 04:44:18 2023 from 172.26.218.129
+
+
+                                                 ___    _   _   _____
+                                                / _ \  | | | | |_   _|
+                  *                            | | | | | | | |   | |
+                 *  *                          | |_| | | |_| |   | |
+                  *                             \__\_\  \___/    |_|
+                 *  *
+                 * *                              WINTER HPC IMAGE
+                  * *
+                   *                                  ^
+            ___.___^_____...__-----.---..._          / \
+ ~~~~~~~~~~/~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`-._..__.;~~~}~~~~~~~~~~~~~~~~~~~~~~
+          /            °                               ≺
+  °      (------ 0        .     *        °   _--.-.-,   }      *
+          \             °     .    .__.___;-‾        \ /               °
+           \_____\  \___.__.____._/                   V
+               \  \  \                                     ___
+     °          \__\  \            *                      (___)
+                    \__\                      °            S S            *
+                                   <=><                    S S       °
+         *                     °
+
+Available walltime until next scheduled maintenance window: 531:4:59
+n9401849@lyra01:~>
 ```
 
 ## Monitoring the status of jobs
@@ -28,4 +86,241 @@ The below command provides a summary of the current jobs and their status.
 qstat -u n9401849
 ```
 
+The monitoring screen looks like this,
+
+```{bash eval = FALSE}
+n9401849@lyra01:~> qstat -u n9401849
+
+pbs:
+                                                                 Req'd  Req'd   Elap
+Job ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S Time
+-------------------- -------- -------- ---------- ------ --- --- ------ ----- - -----
+5005627.pbs          n9401849 quick    asra1_Ast*    --    1   1    2gb 01:00 Q   --
+5005628.pbs          n9401849 quick    asra1_CHD*    --    1   1    2gb 01:00 Q   --
+```
+
+where most of the columns are not particularly helpful (at least for beginners). The columns we're interested in are the `Req'd Memory` and `Req'd Time` columns which give the amount of memory and time requested in your bash script. If these don't look right, stop the job. We'll show you how to stop jobs later, but note that you'll need to know the `Job ID` to do so.  
+
+The other column to be interested in is the `Elap Time` column. Once your job has started (indicated by the `S` column showing `R` for that job) the elapsed time column shows how long the job has been running for. Once `Elap Time` is equal to `Req'd Time` the job stops --- regardless if it has finished or not! For this reason it is always best to slightly overestimate the run time of your models.
+
+When your models are running the `qstat` call will look like this.  
+
+```{bash eval=FALSE}
+n9401849@lyra01:~> qstat -u n9401849
+
+pbs:
+                                                                 Req'd  Req'd   Elap
+Job ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S Time
+-------------------- -------- -------- ---------- ------ --- --- ------ ----- - -----
+5005629.pbs          n9401849 quick    asra1_Ast*  47118   1   1    2gb 01:00 R 00:01
+5005630.pbs          n9401849 quick    asra1_CHD*  47168   1   1    2gb 01:00 R 00:01
+````
+  
+## The `.sub` script
+
+```{bash, eval = FALSE, attr.source='.numberLines'}
+#!/bin/bash -l
+#PBS -N myjob 				// NAME of job on lyra
+#PBS -l ncpus=1 			// number of cores - set to 1
+#PBS -l mem=2GB 			// memory allocation for job
+#PBS -l walltime=1:00:00	// time allocation for job
+#PBS -e myjob_errors
+#PBS -o myjob_output
+```
+
+## Choosing `walltime` and `mem`
+
+Walltime is the total amount of time it will take to complete your job. This includes loading packages, data, compiling the model, summarising and saving. You must leave sufficient time for all these tasks to be complete as the HPC will stop the job once the `walltime` has been met. Like most of our scripts, the last job is always to save our results... this is often the task that can be 
+
+## Understanding the output file
+
+Here is an example of the corresponding output file that lyra creates when a job has stopped. In (almost!) all cases, lyra will create an output and error file regardless of whether the job was successful. Generally when I refer to success I mean the R script finished running and the required files were successfully saved.  
+
+```{bash eval=FALSE}
+R version 4.0.3 (2020-10-10) -- "Bunny-Wunnies Freak Out"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> .libPaths('r_lib');
+> base_folder='QUTHPC_training';
+> model_spec='asra1';
+> sex='Female';
+> condition='Asthma';
+> Rfile='asra1_Asthma_Female';
+> cur_date='20230815';
+> niter=800;
+> nburnin=400;
+> thin=1;
+> nchains=4;
+> source('QUTHPC_training/ms.R');
+|-------------|-------------|-------------|-------------|
+|-------------------------------------------------------|
+|-------------|-------------|-------------|-------------|
+|-------------------------------------------------------|
+|-------------|-------------|-------------|-------------|
+|-------------------------------------------------------|
+|-------------|-------------|-------------|-------------|
+|-------------------------------------------------------|
+> 
+> 
+PBS Job 5005634.pbs
+CPU time  : 00:04:10
+Wall time : 00:05:50
+Mem usage : 2097152kb
+```
+
+## Understanding the error file
+
+Here is an example of the corresponding error file that corresponds to a specific job. 
+
+```{bash eval=FALSE}
+── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──
+✔ ggplot2 3.3.5     ✔ purrr   0.3.4
+✔ tibble  3.1.5     ✔ dplyr   1.0.7
+✔ tidyr   1.1.4     ✔ stringr 1.4.0
+✔ readr   2.1.1     ✔ forcats 0.5.1
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+Linking to GEOS 3.9.1, GDAL 3.2.1, PROJ 7.2.1
+Loading required package: sp
+Loading required package: spData
+To access larger datasets in this package, install the spDataLarge
+package with: `install.packages('spDataLarge',
+repos='https://nowosad.github.io/drat/', type='source')`
+nimble version 0.12.2 is loaded.
+For more information on NIMBLE and a User Manual,
+please visit https://R-nimble.org.
+
+Attaching package: ‘nimble’
+
+The following object is masked from ‘package:stats’:
+
+    simulate
+
+
+Attaching package: ‘Matrix’
+
+The following objects are masked from ‘package:tidyr’:
+
+    expand, pack, unpack
+
+This is bayesplot version 1.8.1
+- Online documentation and vignettes at mc-stan.org/bayesplot
+- bayesplot theme set to bayesplot::theme_default()
+   * Does _not_ affect other ggplot2 plots
+   * See ?bayesplot_theme_set for details on theme setting
+Defining model
+Building model
+Setting data and initial values
+Running calculate on model
+  [Note] Any error reports that follow may simply reflect missing values in model variables.
+Checking model sizes and dimensions
+  [Note] All model variables are initialized.
+Compiling
+  [Note] This may take a minute.
+  [Note] Use 'showCompilerOutput = TRUE' to see C++ compilation details.
+Compiling
+  [Note] This may take a minute.
+  [Note] Use 'showCompilerOutput = TRUE' to see C++ compilation details.
+Starting sampling for 400 iterations for each of 4 chains.
+Running chain 1 ...
+Running chain 2 ...
+Running chain 3 ...
+Running chain 4 ...
+Sampling took 0.92 mins
+Median Rhat: 1 
+0.01% of Rhats larger than 1.01 
+Max Rhat = 1.01 (sigma) 
+0.01% of ess_bulk are too small 
+Min ess_bulk = 311.19 (sigma) 
+0.01% of ess_tail are too small 
+Min ess_tail = 285.74 (sigma) 
+Average posterior draws per minute: 
+Progress ... -> Point estimates...
+Progress ... -> Standard errors...
+Progress ... -> Highest density intervals...
+Progress ... -> Point estimates...
+Progress ... -> Standard errors...
+Progress ... -> Highest density intervals...
+```
+
+As you can observe this provides some of the output from `R` like you would see in `Rstudio` on your local machine. 
+
+The examples above are for successful jobs. Below is an example error script when a job is stopped early due to an error in `R`. 
+
+```{bash eval=FALSE}
+── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──
+✔ ggplot2 3.3.5     ✔ purrr   0.3.4
+✔ tibble  3.1.5     ✔ dplyr   1.0.7
+✔ tidyr   1.1.4     ✔ stringr 1.4.0
+✔ readr   2.1.1     ✔ forcats 0.5.1
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+Linking to GEOS 3.9.1, GDAL 3.2.1, PROJ 7.2.1
+Loading required package: sp
+Loading required package: spData
+To access larger datasets in this package, install the spDataLarge
+package with: `install.packages('spDataLarge',
+repos='https://nowosad.github.io/drat/', type='source')`
+nimble version 0.12.2 is loaded.
+For more information on NIMBLE and a User Manual,
+please visit https://R-nimble.org.
+
+Attaching package: ‘nimble’
+
+The following object is masked from ‘package:stats’:
+
+    simulate
+
+
+Attaching package: ‘Matrix’
+
+The following objects are masked from ‘package:tidyr’:
+
+    expand, pack, unpack
+
+This is bayesplot version 1.8.1
+- Online documentation and vignettes at mc-stan.org/bayesplot
+- bayesplot theme set to bayesplot::theme_default()
+   * Does _not_ affect other ggplot2 plots
+   * See ?bayesplot_theme_set for details on theme setting
+Error in file(filename, "r", encoding = encoding) : 
+  cannot open the connection
+Calls: source -> withVisible -> eval -> eval -> source -> file
+In addition: Warning message:
+In file(filename, "r", encoding = encoding) :
+  cannot open file 'QUTHPC_training/r_src/asra2.R': No such file or directory
+Execution halted
+```
+
+In the above example, the job was stopped early due to a directory issue. 
+
+## Other errors
+
+Sometimes an error will occur that is unique and potentially one that cannot be described in the standard error and output files. In these instances you will receive an email that may look like this. If this happens please contact me. In most cases, these are a result of an error in the HPC system.  
+
+![alt text here](imgs/EmailErrorHPC.png)
+
+## Run in an interactive session
+
+```{bash eval = FALSE}
+qsub -I -S /bin/bash -l walltime=2:00:00,ncpus=4,mem=50gb
+logout # when finished
+```
 
