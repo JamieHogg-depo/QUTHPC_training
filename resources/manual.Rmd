@@ -78,6 +78,12 @@ Available walltime until next scheduled maintenance window: 531:4:59
 n9401849@lyra01:~>
 ```
 
+## Installing R packages
+
+ - modules
+ - using .libPaths("r_lib")
+ - running installations in the head node - big no no
+
 ## Monitoring the status of jobs
 
 The below command provides a summary of the current jobs and their status. 
@@ -313,9 +319,11 @@ In the above example, the job was stopped early due to a directory issue.
 
 ## Other errors
 
-Sometimes an error will occur that is unique and potentially one that cannot be described in the standard error and output files. In these instances you will receive an email that may look like this. If this happens please contact me. In most cases, these are a result of an error in the HPC system.  
+Sometimes an error will occur that is unique and potentially one that cannot be described in the standard error and output files. In these instances you will receive an automated email from the HPC system that may look like this.
 
 ![alt text here](imgs/EmailErrorHPC.png)
+
+If this happens please contact me. In most cases, these are a result of an error in the HPC system.  
 
 ## Run in an interactive session
 
