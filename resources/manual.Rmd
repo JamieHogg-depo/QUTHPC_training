@@ -19,6 +19,15 @@ This document stands as a stripped back manual for successfully operating the Qu
 - I am not a programmer
 - spaces matter
 - Fantastic resources by Ethan Goan
+- Overwrite old runs of models when it doesn't work
+- Two situations: 
+	- running models in batch
+	- running single models to check convergence
+- Schedule:
+	- 1 hour of this manuel
+	- 1 hour of running a single .sub file
+	- 1 hour of running a batch of models
+- Pre-training to install packages
 
 ## Logging in for the first time 
 
@@ -78,11 +87,109 @@ Available walltime until next scheduled maintenance window: 531:4:59
 n9401849@lyra01:~>
 ```
 
-## Installing R packages
+The Lyra head node is what I call the "entrance" to the HPC. Think of it like the lobby of a hotel: you don't spend much time there or do anything considerable (like running a model!), but you have to go through it each time you wish to enter or leave your room. Furthermore if you'd like to change your room or make a request (submit a job to the HPC) you have to go to the lobby to do so (at least before we had phones!). 
 
- - modules
- - using .libPaths("r_lib")
- - running installations in the head node - big no no
+# Some basic Bash/Unix code
+
+The QUT HPC runs on a programming language called Bash or Unix. The two languages are similar but not identical. That said, the distinction is not important here. Let's explore some simple Unix code to get started.  
+
+When you first enter the HPC system, Lyra will automatically place you in your home directory. To see what files are there you can (1) explore the mounted drive on your computer or (2) type 
+
+```{bash, eval = FALSE}
+ls
+``` 
+
+directly in Lyra.
+
+If you'd like to explore a folder you can type `cd myfolder` where you can replace `myfolder` with the name of the folder you'd like to explore. To return to the outer folder just type `cd ..`. **NOTE**: *Spaces matter a great deal in Unix so please be careful when typing in the commands.*
+
+You can even access R directly in the head node. Just enter the following lines, clicking enter for each new line.
+
+```{bash, eval = FALSE}
+module load r/4.0.3-foss-2020b
+R
+``` 
+
+You should see the normal R information printed to your console. To return to the head node, just type `q()`. **NOTE**: *It is generally ill-advised to access software directly in the head node as it can make everyones HPC experience slower (don't be that person!). The head node is not a powerful computer and should only be used to submit jobs!*
+
+You'll notice that we ran a strange command starting with `module load `. Modules are pieces of software that are available from the QUT HPC - there are absolutely loads! If all were loaded every time we opened Lyra, we would be waiting for a **long** time. Instead, we have to tell Lyra what modules we'd like to use. In the case above I told the QUT HPC that I would like to use R version 4.0.3. At the time of writing, this is the most recent version of R available to HPC users.  
+
+## Your first HPC job - installing R packages
+
+As you might expect loading the R module only loads base R packages. To install packages we'll learn how to exit the Lyra head node and enter a hotel room (aka, a HPC job). 
+
+The way **most** HPCs work is that submit a request asking for specific computational resources for a specific time period. Then we wait for the HPC (or more specifically the Portable Batch System (PBS)) to find us the required computational resources. Depending on your specifications you could be waiting seconds or days for the computational resources to become available. **Remember**: *You and other researchers are sharing the HPC so try to never request more resources than you need. This common courtesy ensures that you don't have to wait hours for a small HPC job like the one above.* 
+
+To ask for a HPC job, we use the `qsub` command, which I **think** means to submit a computational query. The example code below shows how to ask for an 1 hour (`walltime`), 1 CPU (`ncpus`) and 2 GB of RAM (`mem`). 
+
+```{bash, eval = FALSE}
+qsub -I -S /bin/bash -l walltime=1:00:00,ncpus=1,mem=2gb
+```
+
+You can of course edit this to match your needs. For example, `qsub -I -S /bin/bash -l walltime=0:20:00,ncpus=1,mem=2gb` only asks for 20 minutes of computational resources. 
+
+Once you type the code above, you should see a printout similar to
+
+```{bash, eval = FALSE}
+n9401849@lyra01:~> qsub -I -S /bin/bash -l walltime=1:00:00,ncpus=1,mem=2gb
+qsub: waiting for job 5030193.pbs to start
+qsub: job 5030193.pbs ready
+
+n9401849@cl4n007:~>
+```
+
+This indicates that you are now inside a "node" of the HPC that will automatically exit (aka shutdown) after 1 hour. Notice how the prefix to the `~>` has changed from `n9401849@lyra01:` (the head node) to `n9401849@cl4n007:` (the job). Now returning to the task at hand, we'd like to run some R code. Using what we just learned we load the R module and open R. 
+
+As you might expect the permissions on the HPC are strict and confusing. You **CANNOT** install R packages into the root directory. If you try, R will send a series of errors your way. Instead, we create a new folder in our personal directory to hold our R packages.  I've called my fodler `r_lib`. You can create your folder in the usual way (via the mounted drive on your local computer), by running
+
+```{r, eval = FALSE}
+dir.create("r_lib")
+```
+
+in R or 
+
+```{r, eval = FALSE}
+mkdir r_lib
+```
+
+in Unix. You choose! 
+
+Next, we need to tell R to install and search for packages in your newly created folder. This is achieved by running 
+
+```{r}
+.libPaths("r_lib")
+```
+
+at the start of all R sessions on the HPC. Without this command, R won't find any of your packages and your HPC job will most likely fail miserably! Now that we have told R where to install your packages, the process is as simple as running `install.packages("<package_name>")`.  
+
+When you are finished installing your packages type `q()` to exit R and then `logout` to end the HPC job. At this stage you'll be returned to the Lyra head node. 
+
+Congratulations, you've just successfully submitted an interactive HPC job to use R.
+
+## HPC jobs
+
+There are two main types of jobs you can submit to HPC; interactive and batch jobs. Interactive jobs provide you with an interactive R session like what you are familiar with now. **NOTE:** *You will need to have your interactive session open for the job to continue.* Batch jobs are intended for jobs that will need to run for longer, or when multiple jobs need to be submitted. Unlike interactive
+jobs, after you submit a batch job, you can close your connection to HPC altogether (and even shut your local computer down) without affecting the jobs processing on the HPC.
+
+We've already learned how to submit interactive jobs, but these can be a little cumbersome, as we need to manually type all our commands into R. What if we had an R script that we'd like to run on the HPC. 
+
+## Submitting an R script
+
+We've already learned how to submit interactive jobs, but these can be a little cumbersome, as we need to manually type all our commands into R. What if we had an R script that we'd like to run on the HPC. Of course, first we need to load the R script into your personal HPC directory; I do this via the mounted drive on my local computer.
+
+To submit an R script, we must write a corresponding `.sub` script which specifies the computational resources we'll require and what we'd like to run. These `.sub` files are written using Unix code. Below is an example. 
+
+```{bash, eval = FALSE, attr.source='.numberLines'}
+#!/bin/bash -l
+#PBS -N myjob 				// NAME of job on lyra
+#PBS -l ncpus=1 			// number of cores - set to 1
+#PBS -l mem=2GB 			// memory allocation for job
+#PBS -l walltime=1:00:00	// time allocation for job
+#PBS -e myjob_errors
+#PBS -o myjob_output
+```
+
+
 
 ## Monitoring the status of jobs
 
@@ -121,18 +228,6 @@ Job ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S 
 5005629.pbs          n9401849 quick    asra1_Ast*  47118   1   1    2gb 01:00 R 00:01
 5005630.pbs          n9401849 quick    asra1_CHD*  47168   1   1    2gb 01:00 R 00:01
 ````
-  
-## The `.sub` script
-
-```{bash, eval = FALSE, attr.source='.numberLines'}
-#!/bin/bash -l
-#PBS -N myjob 				// NAME of job on lyra
-#PBS -l ncpus=1 			// number of cores - set to 1
-#PBS -l mem=2GB 			// memory allocation for job
-#PBS -l walltime=1:00:00	// time allocation for job
-#PBS -e myjob_errors
-#PBS -o myjob_output
-```
 
 ## Choosing `walltime` and `mem`
 
@@ -324,11 +419,4 @@ Sometimes an error will occur that is unique and potentially one that cannot be 
 ![alt text here](imgs/EmailErrorHPC.png)
 
 If this happens please contact me. In most cases, these are a result of an error in the HPC system.  
-
-## Run in an interactive session
-
-```{bash eval = FALSE}
-qsub -I -S /bin/bash -l walltime=2:00:00,ncpus=4,mem=50gb
-logout # when finished
-```
 

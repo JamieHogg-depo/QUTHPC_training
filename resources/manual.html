@@ -265,6 +265,19 @@ pre code {
 <li>I am not a programmer</li>
 <li>spaces matter</li>
 <li>Fantastic resources by Ethan Goan</li>
+<li>Overwrite old runs of models when it doesn’t work</li>
+<li>Two situations:
+<ul>
+<li>running models in batch</li>
+<li>running single models to check convergence</li>
+</ul></li>
+<li>Schedule:
+<ul>
+<li>1 hour of this manuel</li>
+<li>1 hour of running a single .sub file</li>
+<li>1 hour of running a batch of models</li>
+</ul></li>
+<li>Pre-training to install packages</li>
 </ul>
 </div>
 <div id="logging-in-for-the-first-time" class="section level2">
@@ -314,49 +327,86 @@ pre code {
 <span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="ex">Available</span> walltime until next scheduled maintenance window: 531:4:59</span>
 <span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="ex">n9401849@lyra01:~</span><span class="op">&gt;</span></span></code></pre></div>
+<p>The Lyra head node is what I call the “entrance” to the HPC. Think of it like the lobby of a hotel: you don’t spend much time there or do anything considerable (like running a model!), but you have to go through it each time you wish to enter or leave your room. Furthermore if you’d like to change your room or make a request (submit a job to the HPC) you have to go to the lobby to do so (at least before we had phones!).</p>
 </div>
-<div id="installing-r-packages" class="section level2">
-<h2>Installing R packages</h2>
-<ul>
-<li>modules</li>
-<li>using .libPaths(“r_lib”)</li>
-<li>running installations in the head node - big no no</li>
-</ul>
+<div id="some-basic-bashunix-code" class="section level1">
+<h1>Some basic Bash/Unix code</h1>
+<p>The QUT HPC runs on a programming language called Bash or Unix. The two languages are similar but not identical. That said, the distinction is not important here. Let’s explore some simple Unix code to get started.</p>
+<p>When you first enter the HPC system, Lyra will automatically place you in your home directory. To see what files are there you can (1) explore the mounted drive on your computer or (2) type</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span></span></code></pre></div>
+<p>directly in Lyra.</p>
+<p>If you’d like to explore a folder you can type <code>cd myfolder</code> where you can replace <code>myfolder</code> with the name of the folder you’d like to explore. To return to the outer folder just type <code>cd ..</code>. <strong>NOTE</strong>: <em>Spaces matter a great deal in Unix so please be careful when typing in the commands.</em></p>
+<p>You can even access R directly in the head node. Just enter the following lines, clicking enter for each new line.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">module</span> load r/4.0.3-foss-2020b</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span></span></code></pre></div>
+<p>You should see the normal R information printed to your console. To return to the head node, just type <code>q()</code>. <strong>NOTE</strong>: <em>It is generally ill-advised to access software directly in the head node as it can make everyones HPC experience slower (don’t be that person!). The head node is not a powerful computer and should only be used to submit jobs!</em></p>
+<p>You’ll notice that we ran a strange command starting with <code>module load</code>. Modules are pieces of software that are available from the QUT HPC - there are absolutely loads! If all were loaded every time we opened Lyra, we would be waiting for a <strong>long</strong> time. Instead, we have to tell Lyra what modules we’d like to use. In the case above I told the QUT HPC that I would like to use R version 4.0.3. At the time of writing, this is the most recent version of R available to HPC users.</p>
+<div id="your-first-hpc-job---installing-r-packages" class="section level2">
+<h2>Your first HPC job - installing R packages</h2>
+<p>As you might expect loading the R module only loads base R packages. To install packages we’ll learn how to exit the Lyra head node and enter a hotel room (aka, a HPC job).</p>
+<p>The way <strong>most</strong> HPCs work is that submit a request asking for specific computational resources for a specific time period. Then we wait for the HPC (or more specifically the Portable Batch System (PBS)) to find us the required computational resources. Depending on your specifications you could be waiting seconds or days for the computational resources to become available. <strong>Remember</strong>: <em>You and other researchers are sharing the HPC so try to never request more resources than you need. This common courtesy ensures that you don’t have to wait hours for a small HPC job like the one above.</em></p>
+<p>To ask for a HPC job, we use the <code>qsub</code> command, which I <strong>think</strong> means to submit a computational query. The example code below shows how to ask for an 1 hour (<code>walltime</code>), 1 CPU (<code>ncpus</code>) and 2 GB of RAM (<code>mem</code>).</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">qsub</span> <span class="at">-I</span> <span class="at">-S</span> /bin/bash <span class="at">-l</span> walltime=1:00:00,ncpus=1,mem=2gb</span></code></pre></div>
+<p>You can of course edit this to match your needs. For example, <code>qsub -I -S /bin/bash -l walltime=0:20:00,ncpus=1,mem=2gb</code> only asks for 20 minutes of computational resources.</p>
+<p>Once you type the code above, you should see a printout similar to</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">n9401849@lyra01:~</span><span class="op">&gt;</span> qsub <span class="at">-I</span> <span class="at">-S</span> /bin/bash <span class="at">-l</span> walltime=1:00:00,ncpus=1,mem=2gb</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">qsub:</span> waiting for job 5030193.pbs to start</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">qsub:</span> job 5030193.pbs ready</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="ex">n9401849@cl4n007:~</span><span class="op">&gt;</span></span></code></pre></div>
+<p>This indicates that you are now inside a “node” of the HPC that will automatically exit (aka shutdown) after 1 hour. Notice how the prefix to the <code>~&gt;</code> has changed from <code>n9401849@lyra01:</code> (the head node) to <code>n9401849@cl4n007:</code> (the job). Now returning to the task at hand, we’d like to run some R code. Using what we just learned we load the R module and open R.</p>
+<p>As you might expect the permissions on the HPC are strict and confusing. You <strong>CANNOT</strong> install R packages into the root directory. If you try, R will send a series of errors your way. Instead, we create a new folder in our personal directory to hold our R packages. I’ve called my fodler <code>r_lib</code>. You can create your folder in the usual way (via the mounted drive on your local computer), by running</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(<span class="st">&quot;r_lib&quot;</span>)</span></code></pre></div>
+<p>in R or</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>mkdir r_lib</span></code></pre></div>
+<p>in Unix. You choose!</p>
+<p>Next, we need to tell R to install and search for packages in your newly created folder. This is achieved by running</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.libPaths</span>(<span class="st">&quot;r_lib&quot;</span>)</span></code></pre></div>
+<p>at the start of all R sessions on the HPC. Without this command, R won’t find any of your packages and your HPC job will most likely fail miserably! Now that we have told R where to install your packages, the process is as simple as running <code>install.packages(&quot;&lt;package_name&gt;&quot;)</code>.</p>
+<p>When you are finished installing your packages type <code>q()</code> to exit R and then <code>logout</code> to end the HPC job. At this stage you’ll be returned to the Lyra head node.</p>
+<p>Congratulations, you’ve just successfully submitted an interactive HPC job to use R.</p>
+</div>
+<div id="hpc-jobs" class="section level2">
+<h2>HPC jobs</h2>
+<p>There are two main types of jobs you can submit to HPC; interactive and batch jobs. Interactive jobs provide you with an interactive R session like what you are familiar with now. <strong>NOTE:</strong> <em>You will need to have your interactive session open for the job to continue.</em> Batch jobs are intended for jobs that will need to run for longer, or when multiple jobs need to be submitted. Unlike interactive jobs, after you submit a batch job, you can close your connection to HPC altogether (and even shut your local computer down) without affecting the jobs processing on the HPC.</p>
+<p>We’ve already learned how to submit interactive jobs, but these can be a little cumbersome, as we need to manually type all our commands into R. What if we had an R script that we’d like to run on the HPC.</p>
+</div>
+<div id="submitting-an-r-script" class="section level2">
+<h2>Submitting an R script</h2>
+<p>We’ve already learned how to submit interactive jobs, but these can be a little cumbersome, as we need to manually type all our commands into R. What if we had an R script that we’d like to run on the HPC. Of course, first we need to load the R script into your personal HPC directory; I do this via the mounted drive on my local computer.</p>
+<p>To submit an R script, we must write a corresponding <code>.sub</code> script which specifies the computational resources we’ll require and what we’d like to run. These <code>.sub</code> files are written using Unix code. Below is an example.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash numberLines"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="co">#!/bin/bash -l</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="co">#PBS -N myjob               // NAME of job on lyra</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="co">#PBS -l ncpus=1             // number of cores - set to 1</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="co">#PBS -l mem=2GB             // memory allocation for job</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="co">#PBS -l walltime=1:00:00    // time allocation for job</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="co">#PBS -e myjob_errors</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="co">#PBS -o myjob_output</span></span></code></pre></div>
 </div>
 <div id="monitoring-the-status-of-jobs" class="section level2">
 <h2>Monitoring the status of jobs</h2>
 <p>The below command provides a summary of the current jobs and their status.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">qstat</span> <span class="at">-u</span> n9401849</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">qstat</span> <span class="at">-u</span> n9401849</span></code></pre></div>
 <p>The monitoring screen looks like this,</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">n9401849@lyra01:~</span><span class="op">&gt;</span> qstat <span class="at">-u</span> n9401849</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pbs:</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                                                                 <span class="ex">Req</span><span class="st">&#39;d  Req&#39;</span><span class="ex">d</span>   Elap</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Job</span> ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S Time</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="ex">--------------------</span> <span class="at">--------</span> <span class="at">--------</span> <span class="at">----------</span> <span class="at">------</span> <span class="at">---</span> <span class="at">---</span> <span class="at">------</span> <span class="at">-----</span> <span class="at">-</span> <span class="at">-----</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="ex">5005627.pbs</span>          n9401849 quick    asra1_Ast<span class="pp">*</span>    <span class="at">--</span>    1   1    2gb 01:00 Q   <span class="at">--</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="ex">5005628.pbs</span>          n9401849 quick    asra1_CHD<span class="pp">*</span>    <span class="at">--</span>    1   1    2gb 01:00 Q   <span class="at">--</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">n9401849@lyra01:~</span><span class="op">&gt;</span> qstat <span class="at">-u</span> n9401849</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pbs:</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                                                                 <span class="ex">Req</span><span class="st">&#39;d  Req&#39;</span><span class="ex">d</span>   Elap</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Job</span> ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S Time</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="ex">--------------------</span> <span class="at">--------</span> <span class="at">--------</span> <span class="at">----------</span> <span class="at">------</span> <span class="at">---</span> <span class="at">---</span> <span class="at">------</span> <span class="at">-----</span> <span class="at">-</span> <span class="at">-----</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="ex">5005627.pbs</span>          n9401849 quick    asra1_Ast<span class="pp">*</span>    <span class="at">--</span>    1   1    2gb 01:00 Q   <span class="at">--</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="ex">5005628.pbs</span>          n9401849 quick    asra1_CHD<span class="pp">*</span>    <span class="at">--</span>    1   1    2gb 01:00 Q   <span class="at">--</span></span></code></pre></div>
 <p>where most of the columns are not particularly helpful (at least for beginners). The columns we’re interested in are the <code>Req&#39;d Memory</code> and <code>Req&#39;d Time</code> columns which give the amount of memory and time requested in your bash script. If these don’t look right, stop the job. We’ll show you how to stop jobs later, but note that you’ll need to know the <code>Job ID</code> to do so.</p>
 <p>The other column to be interested in is the <code>Elap Time</code> column. Once your job has started (indicated by the <code>S</code> column showing <code>R</code> for that job) the elapsed time column shows how long the job has been running for. Once <code>Elap Time</code> is equal to <code>Req&#39;d Time</code> the job stops — regardless if it has finished or not! For this reason it is always best to slightly overestimate the run time of your models.</p>
 <p>When your models are running the <code>qstat</code> call will look like this.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">n9401849@lyra01:~</span><span class="op">&gt;</span> qstat <span class="at">-u</span> n9401849</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pbs:</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                                                                 <span class="ex">Req</span><span class="st">&#39;d  Req&#39;</span><span class="ex">d</span>   Elap</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Job</span> ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S Time</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="ex">--------------------</span> <span class="at">--------</span> <span class="at">--------</span> <span class="at">----------</span> <span class="at">------</span> <span class="at">---</span> <span class="at">---</span> <span class="at">------</span> <span class="at">-----</span> <span class="at">-</span> <span class="at">-----</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="ex">5005629.pbs</span>          n9401849 quick    asra1_Ast<span class="pp">*</span>  47118   1   1    2gb 01:00 R 00:01</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="ex">5005630.pbs</span>          n9401849 quick    asra1_CHD<span class="pp">*</span>  47168   1   1    2gb 01:00 R 00:01</span></code></pre></div>
-</div>
-<div id="the-.sub-script" class="section level2">
-<h2>The <code>.sub</code> script</h2>
-<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource bash numberLines"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">#!/bin/bash -l</span></span>
-<span id="cb6-2"><a href="#cb6-2"></a><span class="co">#PBS -N myjob               // NAME of job on lyra</span></span>
-<span id="cb6-3"><a href="#cb6-3"></a><span class="co">#PBS -l ncpus=1             // number of cores - set to 1</span></span>
-<span id="cb6-4"><a href="#cb6-4"></a><span class="co">#PBS -l mem=2GB             // memory allocation for job</span></span>
-<span id="cb6-5"><a href="#cb6-5"></a><span class="co">#PBS -l walltime=1:00:00    // time allocation for job</span></span>
-<span id="cb6-6"><a href="#cb6-6"></a><span class="co">#PBS -e myjob_errors</span></span>
-<span id="cb6-7"><a href="#cb6-7"></a><span class="co">#PBS -o myjob_output</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">n9401849@lyra01:~</span><span class="op">&gt;</span> qstat <span class="at">-u</span> n9401849</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pbs:</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                                                                 <span class="ex">Req</span><span class="st">&#39;d  Req&#39;</span><span class="ex">d</span>   Elap</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Job</span> ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S Time</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="ex">--------------------</span> <span class="at">--------</span> <span class="at">--------</span> <span class="at">----------</span> <span class="at">------</span> <span class="at">---</span> <span class="at">---</span> <span class="at">------</span> <span class="at">-----</span> <span class="at">-</span> <span class="at">-----</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="ex">5005629.pbs</span>          n9401849 quick    asra1_Ast<span class="pp">*</span>  47118   1   1    2gb 01:00 R 00:01</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="ex">5005630.pbs</span>          n9401849 quick    asra1_CHD<span class="pp">*</span>  47168   1   1    2gb 01:00 R 00:01</span></code></pre></div>
 </div>
 <div id="choosing-walltime-and-mem" class="section level2">
 <h2>Choosing <code>walltime</code> and <code>mem</code></h2>
@@ -365,168 +415,168 @@ pre code {
 <div id="understanding-the-output-file" class="section level2">
 <h2>Understanding the output file</h2>
 <p>Here is an example of the corresponding output file that lyra creates when a job has stopped. In (almost!) all cases, lyra will create an output and error file regardless of whether the job was successful. Generally when I refer to success I mean the R script finished running and the required files were successfully saved.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> version 4.0.3 <span class="er">(</span><span class="ex">2020-10-10</span><span class="kw">)</span> <span class="ex">--</span> <span class="st">&quot;Bunny-Wunnies Freak Out&quot;</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Copyright</span> <span class="er">(</span><span class="ex">C</span><span class="kw">)</span> <span class="ex">2020</span> The R Foundation for Statistical Computing</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Platform:</span> x86_64-pc-linux-gnu <span class="er">(</span><span class="ex">64-bit</span><span class="kw">)</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> is free software and comes with ABSOLUTELY NO WARRANTY.</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="ex">You</span> are welcome to redistribute it under certain conditions.</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="ex">Type</span> <span class="st">&#39;license()&#39;</span> or <span class="st">&#39;licence()&#39;</span> for distribution details.</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="ex">Natural</span> language support but running in an English locale</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> is a collaborative project with many contributors.</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="ex">Type</span> <span class="st">&#39;contributors()&#39;</span> for more information and</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;citation()&#39;</span> on how to cite R or R packages in publications.</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="ex">Type</span> <span class="st">&#39;demo()&#39;</span> for some demos, <span class="st">&#39;help()&#39;</span> for on-line help, or</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;help.start()&#39;</span> for an HTML browser interface to help.</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="ex">Type</span> <span class="st">&#39;q()&#39;</span> to quit R.</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> .libPaths<span class="kw">(</span><span class="st">&#39;r_lib&#39;</span><span class="kw">);</span></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> base_folder=<span class="st">&#39;QUTHPC_training&#39;</span><span class="kw">;</span></span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> model_spec=<span class="st">&#39;asra1&#39;</span><span class="kw">;</span></span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> sex=<span class="st">&#39;Female&#39;</span><span class="kw">;</span></span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> condition=<span class="st">&#39;Asthma&#39;</span><span class="kw">;</span></span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> Rfile=<span class="st">&#39;asra1_Asthma_Female&#39;</span><span class="kw">;</span></span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> cur_date=<span class="st">&#39;20230815&#39;</span><span class="kw">;</span></span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> niter=800<span class="kw">;</span></span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> nburnin=400<span class="kw">;</span></span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> thin=1<span class="kw">;</span></span>
-<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> nchains=4<span class="kw">;</span></span>
-<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> source<span class="kw">(</span><span class="st">&#39;QUTHPC_training/ms.R&#39;</span><span class="kw">);</span></span>
-<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
-<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
-<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
-<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
-<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
-<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
-<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
-<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
-<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> </span>
-<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> </span>
-<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a><span class="ex">PBS</span> Job 5005634.pbs</span>
-<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a><span class="ex">CPU</span> time  : 00:04:10</span>
-<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="ex">Wall</span> time : 00:05:50</span>
-<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="ex">Mem</span> usage : 2097152kb</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> version 4.0.3 <span class="er">(</span><span class="ex">2020-10-10</span><span class="kw">)</span> <span class="ex">--</span> <span class="st">&quot;Bunny-Wunnies Freak Out&quot;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Copyright</span> <span class="er">(</span><span class="ex">C</span><span class="kw">)</span> <span class="ex">2020</span> The R Foundation for Statistical Computing</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Platform:</span> x86_64-pc-linux-gnu <span class="er">(</span><span class="ex">64-bit</span><span class="kw">)</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> is free software and comes with ABSOLUTELY NO WARRANTY.</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="ex">You</span> are welcome to redistribute it under certain conditions.</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="ex">Type</span> <span class="st">&#39;license()&#39;</span> or <span class="st">&#39;licence()&#39;</span> for distribution details.</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="ex">Natural</span> language support but running in an English locale</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> is a collaborative project with many contributors.</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="ex">Type</span> <span class="st">&#39;contributors()&#39;</span> for more information and</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;citation()&#39;</span> on how to cite R or R packages in publications.</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="ex">Type</span> <span class="st">&#39;demo()&#39;</span> for some demos, <span class="st">&#39;help()&#39;</span> for on-line help, or</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;help.start()&#39;</span> for an HTML browser interface to help.</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="ex">Type</span> <span class="st">&#39;q()&#39;</span> to quit R.</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> .libPaths<span class="kw">(</span><span class="st">&#39;r_lib&#39;</span><span class="kw">);</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> base_folder=<span class="st">&#39;QUTHPC_training&#39;</span><span class="kw">;</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> model_spec=<span class="st">&#39;asra1&#39;</span><span class="kw">;</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> sex=<span class="st">&#39;Female&#39;</span><span class="kw">;</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> condition=<span class="st">&#39;Asthma&#39;</span><span class="kw">;</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> Rfile=<span class="st">&#39;asra1_Asthma_Female&#39;</span><span class="kw">;</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> cur_date=<span class="st">&#39;20230815&#39;</span><span class="kw">;</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> niter=800<span class="kw">;</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> nburnin=400<span class="kw">;</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> thin=1<span class="kw">;</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> nchains=4<span class="kw">;</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> source<span class="kw">(</span><span class="st">&#39;QUTHPC_training/ms.R&#39;</span><span class="kw">);</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> </span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> </span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a><span class="ex">PBS</span> Job 5005634.pbs</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="ex">CPU</span> time  : 00:04:10</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a><span class="ex">Wall</span> time : 00:05:50</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a><span class="ex">Mem</span> usage : 2097152kb</span></code></pre></div>
 </div>
 <div id="understanding-the-error-file" class="section level2">
 <h2>Understanding the error file</h2>
 <p>Here is an example of the corresponding error file that corresponds to a specific job.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> ggplot2 3.3.5     ✔ purrr   0.3.4</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> tibble  3.1.5     ✔ dplyr   1.0.7</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> tidyr   1.1.4     ✔ stringr 1.4.0</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> readr   2.1.1     ✔ forcats 0.5.1</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> Conflicts ────────────────────────────────────────── tidyverse_conflicts<span class="er">(</span><span class="kw">)</span> <span class="ex">──</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="ex">✖</span> dplyr::filter<span class="er">(</span><span class="kw">)</span> <span class="ex">masks</span> stats::filter<span class="er">(</span><span class="kw">)</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="ex">✖</span> dplyr::lag<span class="er">(</span><span class="kw">)</span>    <span class="ex">masks</span> stats::lag<span class="er">(</span><span class="kw">)</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="ex">Linking</span> to GEOS 3.9.1, GDAL 3.2.1, PROJ 7.2.1</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="ex">Loading</span> required package: sp</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="ex">Loading</span> required package: spData</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="ex">To</span> access larger datasets in this package, install the spDataLarge</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="ex">package</span> with: <span class="kw">`</span><span class="ex">install.packages</span><span class="er">(</span><span class="st">&#39;spDataLarge&#39;</span><span class="ex">,</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="va">repos=</span><span class="st">&#39;https://nowosad.github.io/drat/&#39;</span>, <span class="va">type=</span><span class="st">&#39;source&#39;</span><span class="er">)</span><span class="kw">`</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="ex">nimble</span> version 0.12.2 is loaded.</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="ex">For</span> more information on NIMBLE and a User Manual,</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="ex">please</span> visit https://R-nimble.org.</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="ex">Attaching</span> package: ‘nimble’</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> following object is masked from ‘package:stats’:</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="ex">simulate</span></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="ex">Attaching</span> package: ‘Matrix’</span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> following objects are masked from ‘package:tidyr’:</span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="ex">expand,</span> pack, unpack</span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="ex">This</span> is bayesplot version 1.8.1</span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="ex">-</span> Online documentation and vignettes at mc-stan.org/bayesplot</span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="ex">-</span> bayesplot theme set to bayesplot::theme_default<span class="er">(</span><span class="kw">)</span></span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>   <span class="ex">*</span> Does _not_ affect other ggplot2 plots</span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>   <span class="ex">*</span> See <span class="pp">?</span>bayesplot_theme_set for details on theme setting</span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a><span class="ex">Defining</span> model</span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="ex">Building</span> model</span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a><span class="ex">Setting</span> data and initial values</span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> calculate on model</span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> Any error reports that follow may simply reflect missing values in model variables.</span>
-<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a><span class="ex">Checking</span> model sizes and dimensions</span>
-<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> All model variables are initialized.</span>
-<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a><span class="ex">Compiling</span></span>
-<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> This may take a minute.</span>
-<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> Use <span class="st">&#39;showCompilerOutput = TRUE&#39;</span> to see C++ compilation details.</span>
-<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a><span class="ex">Compiling</span></span>
-<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> This may take a minute.</span>
-<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> Use <span class="st">&#39;showCompilerOutput = TRUE&#39;</span> to see C++ compilation details.</span>
-<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a><span class="ex">Starting</span> sampling for 400 iterations for each of 4 chains.</span>
-<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 1 ...</span>
-<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 2 ...</span>
-<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 3 ...</span>
-<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 4 ...</span>
-<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a><span class="ex">Sampling</span> took 0.92 mins</span>
-<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a><span class="ex">Median</span> Rhat: 1 </span>
-<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a><span class="ex">0.01%</span> of Rhats larger than 1.01 </span>
-<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a><span class="ex">Max</span> Rhat = 1.01 <span class="er">(</span><span class="ex">sigma</span><span class="kw">)</span> </span>
-<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a><span class="ex">0.01%</span> of ess_bulk are too small </span>
-<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a><span class="ex">Min</span> ess_bulk = 311.19 <span class="er">(</span><span class="ex">sigma</span><span class="kw">)</span> </span>
-<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a><span class="ex">0.01%</span> of ess_tail are too small </span>
-<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a><span class="ex">Min</span> ess_tail = 285.74 <span class="er">(</span><span class="ex">sigma</span><span class="kw">)</span> </span>
-<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a><span class="ex">Average</span> posterior draws per minute: </span>
-<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Point estimates...</span>
-<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Standard errors...</span>
-<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Highest density intervals...</span>
-<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Point estimates...</span>
-<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Standard errors...</span>
-<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Highest density intervals...</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> ggplot2 3.3.5     ✔ purrr   0.3.4</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> tibble  3.1.5     ✔ dplyr   1.0.7</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> tidyr   1.1.4     ✔ stringr 1.4.0</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> readr   2.1.1     ✔ forcats 0.5.1</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> Conflicts ────────────────────────────────────────── tidyverse_conflicts<span class="er">(</span><span class="kw">)</span> <span class="ex">──</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="ex">✖</span> dplyr::filter<span class="er">(</span><span class="kw">)</span> <span class="ex">masks</span> stats::filter<span class="er">(</span><span class="kw">)</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="ex">✖</span> dplyr::lag<span class="er">(</span><span class="kw">)</span>    <span class="ex">masks</span> stats::lag<span class="er">(</span><span class="kw">)</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="ex">Linking</span> to GEOS 3.9.1, GDAL 3.2.1, PROJ 7.2.1</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="ex">Loading</span> required package: sp</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="ex">Loading</span> required package: spData</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="ex">To</span> access larger datasets in this package, install the spDataLarge</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="ex">package</span> with: <span class="kw">`</span><span class="ex">install.packages</span><span class="er">(</span><span class="st">&#39;spDataLarge&#39;</span><span class="ex">,</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="va">repos=</span><span class="st">&#39;https://nowosad.github.io/drat/&#39;</span>, <span class="va">type=</span><span class="st">&#39;source&#39;</span><span class="er">)</span><span class="kw">`</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="ex">nimble</span> version 0.12.2 is loaded.</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="ex">For</span> more information on NIMBLE and a User Manual,</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="ex">please</span> visit https://R-nimble.org.</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="ex">Attaching</span> package: ‘nimble’</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> following object is masked from ‘package:stats’:</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="ex">simulate</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="ex">Attaching</span> package: ‘Matrix’</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> following objects are masked from ‘package:tidyr’:</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>    <span class="ex">expand,</span> pack, unpack</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a><span class="ex">This</span> is bayesplot version 1.8.1</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a><span class="ex">-</span> Online documentation and vignettes at mc-stan.org/bayesplot</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a><span class="ex">-</span> bayesplot theme set to bayesplot::theme_default<span class="er">(</span><span class="kw">)</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>   <span class="ex">*</span> Does _not_ affect other ggplot2 plots</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>   <span class="ex">*</span> See <span class="pp">?</span>bayesplot_theme_set for details on theme setting</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a><span class="ex">Defining</span> model</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a><span class="ex">Building</span> model</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a><span class="ex">Setting</span> data and initial values</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> calculate on model</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> Any error reports that follow may simply reflect missing values in model variables.</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a><span class="ex">Checking</span> model sizes and dimensions</span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> All model variables are initialized.</span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a><span class="ex">Compiling</span></span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> This may take a minute.</span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> Use <span class="st">&#39;showCompilerOutput = TRUE&#39;</span> to see C++ compilation details.</span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a><span class="ex">Compiling</span></span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> This may take a minute.</span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> Use <span class="st">&#39;showCompilerOutput = TRUE&#39;</span> to see C++ compilation details.</span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a><span class="ex">Starting</span> sampling for 400 iterations for each of 4 chains.</span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 1 ...</span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 2 ...</span>
+<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 3 ...</span>
+<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 4 ...</span>
+<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a><span class="ex">Sampling</span> took 0.92 mins</span>
+<span id="cb15-56"><a href="#cb15-56" aria-hidden="true" tabindex="-1"></a><span class="ex">Median</span> Rhat: 1 </span>
+<span id="cb15-57"><a href="#cb15-57" aria-hidden="true" tabindex="-1"></a><span class="ex">0.01%</span> of Rhats larger than 1.01 </span>
+<span id="cb15-58"><a href="#cb15-58" aria-hidden="true" tabindex="-1"></a><span class="ex">Max</span> Rhat = 1.01 <span class="er">(</span><span class="ex">sigma</span><span class="kw">)</span> </span>
+<span id="cb15-59"><a href="#cb15-59" aria-hidden="true" tabindex="-1"></a><span class="ex">0.01%</span> of ess_bulk are too small </span>
+<span id="cb15-60"><a href="#cb15-60" aria-hidden="true" tabindex="-1"></a><span class="ex">Min</span> ess_bulk = 311.19 <span class="er">(</span><span class="ex">sigma</span><span class="kw">)</span> </span>
+<span id="cb15-61"><a href="#cb15-61" aria-hidden="true" tabindex="-1"></a><span class="ex">0.01%</span> of ess_tail are too small </span>
+<span id="cb15-62"><a href="#cb15-62" aria-hidden="true" tabindex="-1"></a><span class="ex">Min</span> ess_tail = 285.74 <span class="er">(</span><span class="ex">sigma</span><span class="kw">)</span> </span>
+<span id="cb15-63"><a href="#cb15-63" aria-hidden="true" tabindex="-1"></a><span class="ex">Average</span> posterior draws per minute: </span>
+<span id="cb15-64"><a href="#cb15-64" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Point estimates...</span>
+<span id="cb15-65"><a href="#cb15-65" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Standard errors...</span>
+<span id="cb15-66"><a href="#cb15-66" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Highest density intervals...</span>
+<span id="cb15-67"><a href="#cb15-67" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Point estimates...</span>
+<span id="cb15-68"><a href="#cb15-68" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Standard errors...</span>
+<span id="cb15-69"><a href="#cb15-69" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Highest density intervals...</span></code></pre></div>
 <p>As you can observe this provides some of the output from <code>R</code> like you would see in <code>Rstudio</code> on your local machine.</p>
 <p>The examples above are for successful jobs. Below is an example error script when a job is stopped early due to an error in <code>R</code>.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> ggplot2 3.3.5     ✔ purrr   0.3.4</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> tibble  3.1.5     ✔ dplyr   1.0.7</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> tidyr   1.1.4     ✔ stringr 1.4.0</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> readr   2.1.1     ✔ forcats 0.5.1</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> Conflicts ────────────────────────────────────────── tidyverse_conflicts<span class="er">(</span><span class="kw">)</span> <span class="ex">──</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="ex">✖</span> dplyr::filter<span class="er">(</span><span class="kw">)</span> <span class="ex">masks</span> stats::filter<span class="er">(</span><span class="kw">)</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="ex">✖</span> dplyr::lag<span class="er">(</span><span class="kw">)</span>    <span class="ex">masks</span> stats::lag<span class="er">(</span><span class="kw">)</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="ex">Linking</span> to GEOS 3.9.1, GDAL 3.2.1, PROJ 7.2.1</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="ex">Loading</span> required package: sp</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="ex">Loading</span> required package: spData</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="ex">To</span> access larger datasets in this package, install the spDataLarge</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="ex">package</span> with: <span class="kw">`</span><span class="ex">install.packages</span><span class="er">(</span><span class="st">&#39;spDataLarge&#39;</span><span class="ex">,</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="va">repos=</span><span class="st">&#39;https://nowosad.github.io/drat/&#39;</span>, <span class="va">type=</span><span class="st">&#39;source&#39;</span><span class="er">)</span><span class="kw">`</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="ex">nimble</span> version 0.12.2 is loaded.</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="ex">For</span> more information on NIMBLE and a User Manual,</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="ex">please</span> visit https://R-nimble.org.</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="ex">Attaching</span> package: ‘nimble’</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> following object is masked from ‘package:stats’:</span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="ex">simulate</span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="ex">Attaching</span> package: ‘Matrix’</span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> following objects are masked from ‘package:tidyr’:</span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    <span class="ex">expand,</span> pack, unpack</span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="ex">This</span> is bayesplot version 1.8.1</span>
-<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="ex">-</span> Online documentation and vignettes at mc-stan.org/bayesplot</span>
-<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="ex">-</span> bayesplot theme set to bayesplot::theme_default<span class="er">(</span><span class="kw">)</span></span>
-<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>   <span class="ex">*</span> Does _not_ affect other ggplot2 plots</span>
-<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>   <span class="ex">*</span> See <span class="pp">?</span>bayesplot_theme_set for details on theme setting</span>
-<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="ex">Error</span> in file<span class="er">(</span><span class="ex">filename,</span> <span class="st">&quot;r&quot;</span>, encoding = encoding<span class="kw">)</span> <span class="bu">:</span> </span>
-<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>  <span class="ex">cannot</span> open the connection</span>
-<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="ex">Calls:</span> source <span class="at">-</span><span class="op">&gt;</span> withVisible <span class="at">-</span><span class="op">&gt;</span> eval <span class="at">-</span><span class="op">&gt;</span> eval <span class="at">-</span><span class="op">&gt;</span> source <span class="at">-</span><span class="op">&gt;</span> file</span>
-<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a><span class="ex">In</span> addition: Warning message:</span>
-<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="ex">In</span> file<span class="er">(</span><span class="ex">filename,</span> <span class="st">&quot;r&quot;</span>, encoding = encoding<span class="kw">)</span> <span class="bu">:</span></span>
-<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>  <span class="ex">cannot</span> open file <span class="st">&#39;QUTHPC_training/r_src/asra2.R&#39;</span>: No such file or directory</span>
-<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a><span class="ex">Execution</span> halted</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> ggplot2 3.3.5     ✔ purrr   0.3.4</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> tibble  3.1.5     ✔ dplyr   1.0.7</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> tidyr   1.1.4     ✔ stringr 1.4.0</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> readr   2.1.1     ✔ forcats 0.5.1</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> Conflicts ────────────────────────────────────────── tidyverse_conflicts<span class="er">(</span><span class="kw">)</span> <span class="ex">──</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="ex">✖</span> dplyr::filter<span class="er">(</span><span class="kw">)</span> <span class="ex">masks</span> stats::filter<span class="er">(</span><span class="kw">)</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="ex">✖</span> dplyr::lag<span class="er">(</span><span class="kw">)</span>    <span class="ex">masks</span> stats::lag<span class="er">(</span><span class="kw">)</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="ex">Linking</span> to GEOS 3.9.1, GDAL 3.2.1, PROJ 7.2.1</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="ex">Loading</span> required package: sp</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="ex">Loading</span> required package: spData</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="ex">To</span> access larger datasets in this package, install the spDataLarge</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="ex">package</span> with: <span class="kw">`</span><span class="ex">install.packages</span><span class="er">(</span><span class="st">&#39;spDataLarge&#39;</span><span class="ex">,</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="va">repos=</span><span class="st">&#39;https://nowosad.github.io/drat/&#39;</span>, <span class="va">type=</span><span class="st">&#39;source&#39;</span><span class="er">)</span><span class="kw">`</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="ex">nimble</span> version 0.12.2 is loaded.</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="ex">For</span> more information on NIMBLE and a User Manual,</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="ex">please</span> visit https://R-nimble.org.</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="ex">Attaching</span> package: ‘nimble’</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> following object is masked from ‘package:stats’:</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    <span class="ex">simulate</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a><span class="ex">Attaching</span> package: ‘Matrix’</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> following objects are masked from ‘package:tidyr’:</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>    <span class="ex">expand,</span> pack, unpack</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a><span class="ex">This</span> is bayesplot version 1.8.1</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a><span class="ex">-</span> Online documentation and vignettes at mc-stan.org/bayesplot</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a><span class="ex">-</span> bayesplot theme set to bayesplot::theme_default<span class="er">(</span><span class="kw">)</span></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>   <span class="ex">*</span> Does _not_ affect other ggplot2 plots</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>   <span class="ex">*</span> See <span class="pp">?</span>bayesplot_theme_set for details on theme setting</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a><span class="ex">Error</span> in file<span class="er">(</span><span class="ex">filename,</span> <span class="st">&quot;r&quot;</span>, encoding = encoding<span class="kw">)</span> <span class="bu">:</span> </span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>  <span class="ex">cannot</span> open the connection</span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a><span class="ex">Calls:</span> source <span class="at">-</span><span class="op">&gt;</span> withVisible <span class="at">-</span><span class="op">&gt;</span> eval <span class="at">-</span><span class="op">&gt;</span> eval <span class="at">-</span><span class="op">&gt;</span> source <span class="at">-</span><span class="op">&gt;</span> file</span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a><span class="ex">In</span> addition: Warning message:</span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a><span class="ex">In</span> file<span class="er">(</span><span class="ex">filename,</span> <span class="st">&quot;r&quot;</span>, encoding = encoding<span class="kw">)</span> <span class="bu">:</span></span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>  <span class="ex">cannot</span> open file <span class="st">&#39;QUTHPC_training/r_src/asra2.R&#39;</span>: No such file or directory</span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a><span class="ex">Execution</span> halted</span></code></pre></div>
 <p>In the above example, the job was stopped early due to a directory issue.</p>
 </div>
 <div id="other-errors" class="section level2">
@@ -538,10 +588,6 @@ pre code {
 </div>
 <p>If this happens please contact me. In most cases, these are a result of an error in the HPC system.</p>
 </div>
-<div id="run-in-an-interactive-session" class="section level2">
-<h2>Run in an interactive session</h2>
-<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">qsub</span> <span class="at">-I</span> <span class="at">-S</span> /bin/bash <span class="at">-l</span> walltime=2:00:00,ncpus=4,mem=50gb</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">logout</span> <span class="co"># when finished</span></span></code></pre></div>
 </div>
 
 
