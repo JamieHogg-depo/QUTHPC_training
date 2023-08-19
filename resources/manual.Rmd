@@ -412,6 +412,22 @@ Execution halted
 
 In the above example, the job was stopped early due to a directory issue. 
 
+## Incorrect memory allocation
+
+Memory value exceeded. In the error file you might see this line.
+
+```{bash, eval = FALSE}
+/var/spool/PBS/mom_priv/jobs/5059208.pbs.SC: line 23: 47174 Killed
+```
+
+While in the output file you might see
+
+```{bash, eval = FALSE}
+Mem usage : 2097152kb
+```
+
+which has clearly exceeded the memory of 2GB we set. Remember there are 1 million kb in a GB.  
+
 ## Other errors
 
 Sometimes an error will occur that is unique and potentially one that cannot be described in the standard error and output files. In these instances you will receive an automated email from the HPC system that may look like this.

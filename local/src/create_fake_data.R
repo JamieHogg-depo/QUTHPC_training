@@ -1,11 +1,11 @@
 ## Create data
 
 set.seed(56)
-for(model_spec in c("model1", "model2")){
+for(model_spec in c("asra1", "asra2")){
   for(condition in c("Asthma", "CHD")){
     for(sex in c("Persons", "Females", "Males")){
       
-      N <- sample(1000:10000, 1)
+      N <- sample(100:1000, 1)
       
       alpha <- rnorm(1, 2,0.1)
       Beta <- rnorm(1, -3, 0.5)

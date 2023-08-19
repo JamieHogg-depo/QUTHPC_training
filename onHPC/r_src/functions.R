@@ -1001,7 +1001,7 @@ jf$sumNimble <-function(input, trim_its = NULL, verbose = TRUE){
 				"Min ess_bulk = ", round(min(summ$ess_bulk, na.rm = T), 2), " (", summ$variable[which(summ$ess_bulk == min(summ$ess_bulk, na.rm = T))][1], ") \n",
 				round(100*mean(ifelse(summ$ess_tail < minimum_ess, 1, 0), na.rm = T), 2), "% of ess_tail are too small \n",
 				"Min ess_tail = ", round(min(summ$ess_tail, na.rm = T), 2), " (", summ$variable[which(summ$ess_tail == min(summ$ess_tail, na.rm = T))][1], ") \n",
-				"Average posterior draws per minute: ", round((niter*nchains)/input$time, 2))
+				"Average posterior draws per minute: ", round((niter*nchains)/time, 2))
 
 	# report messages
 	if(verbose){
