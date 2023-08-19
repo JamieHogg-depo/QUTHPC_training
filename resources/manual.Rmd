@@ -181,15 +181,34 @@ To submit an R script, we must write a corresponding `.sub` script which specifi
 
 ```{bash, eval = FALSE, attr.source='.numberLines'}
 #!/bin/bash -l
-#PBS -N myjob 				// NAME of job on lyra
-#PBS -l ncpus=1 			// number of cores - set to 1
-#PBS -l mem=2GB 			// memory allocation for job
-#PBS -l walltime=1:00:00	// time allocation for job
-#PBS -e myjob_errors
-#PBS -o myjob_output
+#PBS -N myfile 				      // NAME of job on lyra
+#PBS -l ncpus=1 			      // number of cores
+#PBS -l mem=2GB 			      // memory allocation for job
+#PBS -l walltime=1:00:00	  // time allocation for job
+#PBS -e myjob_errors        // where to save the error file
+#PBS -o myjob_output        // where to save the output file 
 ```
 
+**NOTE:** *Do not include the backslashes and comments, these cause headaches for Unix. I have included them for instructional purposes only.*
 
+The above `.sub` file is complete, but doesn't have any commands yet. To run an R script using a `.sub` script we can add the following lines of code. 
+
+```{bash, eval = FALSE, attr.source='.numberLines'}
+module load r/4.0.3-foss-2020b
+module load gdal/3.2.1-foss-2020b
+R -e "source('QUTHPC_training/single/ms.R')"
+```
+
+The example above is extremely simple. On lines 1 and 2 we load the R module and the `gdal` module, which is required when handling spatial data in R. On the 3rd line we tell Unix to open R and then run what ever code is inside the quotation marks. Technically you could write **all** your R code here, however I strongly recommend against this.
+
+Instead, we tell R to run the entire `ms.R` script. Now that we have successfully written a `.sub` file, we can use it to create a HPC job. 
+
+```{bash, eval = FALSE}
+n9401849@lyra01:~> qsub myfile.sub
+5059221.pbs
+```
+
+By running `qsub <sub_file>`, we tell the PBS system to read the file for both the computational resources we required and the code we wish to run. When running a single `.sub` file, the PBS will acknowledge your request for a job by printing a unique PBS number. In the example above this is `5059221.pbs`. If you do not see a unique PBS number, then there is something wrong with your `.sub` file.    
 
 ## Monitoring the status of jobs
 
@@ -414,7 +433,7 @@ In the above example, the job was stopped early due to a directory issue.
 
 ## Incorrect memory allocation
 
-Memory value exceeded. In the error file you might see this line.
+In the error file you might see this line.
 
 ```{bash, eval = FALSE}
 /var/spool/PBS/mom_priv/jobs/5059208.pbs.SC: line 23: 47174 Killed
@@ -426,7 +445,27 @@ While in the output file you might see
 Mem usage : 2097152kb
 ```
 
-which has clearly exceeded the memory of 2GB we set. Remember there are 1 million kb in a GB.  
+which has clearly exceeded the memory of 2GB we set. Remember there are 1 million kb in a GB. 
+
+## Incorrect time allocated
+
+Sometimes you might underestimate how long your model will take to run, resulting in the HPC stopping your job before it's done. 
+
+In the error file you will see something like 
+
+```{bash, eval = FALSE}
+=>> PBS: job killed: walltime 77 exceeded limit 60
+```
+
+While in the output file you'll see 
+
+```{bash, eval = FALSE}
+CPU time  : 00:00:59
+Wall time : 00:01:28
+Mem usage : 1029864kb
+```
+
+which clearly shows that we've exceeded the time limit we set of 1 minute. 
 
 ## Other errors
 
