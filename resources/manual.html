@@ -253,13 +253,32 @@ pre code {
 
 </div>
 
-
-<div id="qut-hpc-manual" class="section level2">
-<h2>QUT HPC Manual</h2>
-<p>This document stands as a stripped back manual for successfully operating the Queensland University of Technologies (QUT) High Performance Computing (HPC) system for staff at the DOHWA.</p>
+<div id="TOC">
+<ul>
+<li><a href="#logging-in-for-the-first-time">Logging in for the first time</a>
+<ul>
+<li><a href="#some-basic-bashunix-code">Some basic Bash/Unix code</a></li>
+</ul></li>
+<li><a href="#your-first-hpc-job---installing-r-packages">Your first HPC job - installing R packages</a></li>
+<li><a href="#hpc-jobs">HPC jobs</a>
+<ul>
+<li><a href="#submitting-an-r-script">Submitting an R script</a></li>
+<li><a href="#monitoring-the-status-of-jobs">Monitoring the status of jobs</a>
+<ul>
+<li><a href="#choosing-walltime-and-mem">Choosing <code>walltime</code> and <code>mem</code></a></li>
+<li><a href="#understanding-the-output-file">Understanding the output file</a></li>
+<li><a href="#understanding-the-error-file">Understanding the error file</a></li>
+<li><a href="#understanding-lyra-errors">Understanding Lyra errors</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#batch-running-of-jobs">Batch running of jobs</a>
+<ul>
+<li><a href="#basic-unix-code---again">Basic Unix code - again</a></li>
+</ul></li>
+</ul>
 </div>
-<div id="background" class="section level2">
-<h2>Background</h2>
+
+<p>This document stands as a stripped back manual for successfully operating the Queensland University of Technologies (QUT) High Performance Computing (HPC) system for staff at the DOHWA.</p>
 <ul>
 <li>I won’t try to explain or teach Unix/Bash code</li>
 <li>I am not a programmer</li>
@@ -279,9 +298,8 @@ pre code {
 </ul></li>
 <li>Pre-training to install packages</li>
 </ul>
-</div>
-<div id="logging-in-for-the-first-time" class="section level2">
-<h2>Logging in for the first time</h2>
+<div id="logging-in-for-the-first-time" class="section level1">
+<h1>Logging in for the first time</h1>
 <p>Open command prompt and type</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="op">&lt;</span>your_qut_id<span class="op">&gt;</span>@lyra.qut.edu.au</span></code></pre></div>
 <p>where you will replace <code>&lt;your_qut_id&gt;</code> with your personal QUT ID. Then hit ENTER. The console will then prompt you to enter your password. <strong>IMPORTANT</strong>: <em>While typing your password, the console will not show you any dots. It will appear as if the console is not recognizing that you’re inputting your password. Be assured that it is.</em></p>
@@ -328,9 +346,8 @@ pre code {
 <span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="ex">Available</span> walltime until next scheduled maintenance window: 531:4:59</span>
 <span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="ex">n9401849@lyra01:~</span><span class="op">&gt;</span></span></code></pre></div>
 <p>The Lyra head node is what I call the “entrance” to the HPC. Think of it like the lobby of a hotel: you don’t spend much time there or do anything considerable (like running a model!), but you have to go through it each time you wish to enter or leave your room. Furthermore if you’d like to change your room or make a request (submit a job to the HPC) you have to go to the lobby to do so (at least before we had phones!).</p>
-</div>
-<div id="some-basic-bashunix-code" class="section level1">
-<h1>Some basic Bash/Unix code</h1>
+<div id="some-basic-bashunix-code" class="section level2">
+<h2>Some basic Bash/Unix code</h2>
 <p>The QUT HPC runs on a programming language called Bash or Unix. The two languages are similar but not identical. That said, the distinction is not important here. Let’s explore some simple Unix code to get started.</p>
 <p>When you first enter the HPC system, Lyra will automatically place you in your home directory. To see what files are there you can (1) explore the mounted drive on your computer or (2) type</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span></span></code></pre></div>
@@ -341,8 +358,10 @@ pre code {
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span></span></code></pre></div>
 <p>You should see the normal R information printed to your console. To return to the head node, just type <code>q()</code>. <strong>NOTE</strong>: <em>It is generally ill-advised to access software directly in the head node as it can make everyones HPC experience slower (don’t be that person!). The head node is not a powerful computer and should only be used to submit jobs!</em></p>
 <p>You’ll notice that we ran a strange command starting with <code>module load</code>. Modules are pieces of software that are available from the QUT HPC - there are absolutely loads! If all were loaded every time we opened Lyra, we would be waiting for a <strong>long</strong> time. Instead, we have to tell Lyra what modules we’d like to use. In the case above I told the QUT HPC that I would like to use R version 4.0.3. At the time of writing, this is the most recent version of R available to HPC users.</p>
-<div id="your-first-hpc-job---installing-r-packages" class="section level2">
-<h2>Your first HPC job - installing R packages</h2>
+</div>
+</div>
+<div id="your-first-hpc-job---installing-r-packages" class="section level1">
+<h1>Your first HPC job - installing R packages</h1>
 <p>As you might expect loading the R module only loads base R packages. To install packages we’ll learn how to exit the Lyra head node and enter a hotel room (aka, a HPC job).</p>
 <p>The way <strong>most</strong> HPCs work is that submit a request asking for specific computational resources for a specific time period. Then we wait for the HPC (or more specifically the Portable Batch System (PBS)) to find us the required computational resources. Depending on your specifications you could be waiting seconds or days for the computational resources to become available. <strong>Remember</strong>: <em>You and other researchers are sharing the HPC so try to never request more resources than you need. This common courtesy ensures that you don’t have to wait hours for a small HPC job like the one above.</em></p>
 <p>To ask for a HPC job, we use the <code>qsub</code> command, which I <strong>think</strong> means to submit a computational query. The example code below shows how to ask for an 1 hour (<code>walltime</code>), 1 CPU (<code>ncpus</code>) and 2 GB of RAM (<code>mem</code>).</p>
@@ -366,22 +385,21 @@ pre code {
 <p>When you are finished installing your packages type <code>q()</code> to exit R and then <code>logout</code> to end the HPC job. At this stage you’ll be returned to the Lyra head node.</p>
 <p>Congratulations, you’ve just successfully submitted an interactive HPC job to use R.</p>
 </div>
-<div id="hpc-jobs" class="section level2">
-<h2>HPC jobs</h2>
+<div id="hpc-jobs" class="section level1">
+<h1>HPC jobs</h1>
 <p>There are two main types of jobs you can submit to HPC; interactive and batch jobs. Interactive jobs provide you with an interactive R session like what you are familiar with now. <strong>NOTE:</strong> <em>You will need to have your interactive session open for the job to continue.</em> Batch jobs are intended for jobs that will need to run for longer, or when multiple jobs need to be submitted. Unlike interactive jobs, after you submit a batch job, you can close your connection to HPC altogether (and even shut your local computer down) without affecting the jobs processing on the HPC.</p>
 <p>We’ve already learned how to submit interactive jobs, but these can be a little cumbersome, as we need to manually type all our commands into R. What if we had an R script that we’d like to run on the HPC.</p>
-</div>
 <div id="submitting-an-r-script" class="section level2">
 <h2>Submitting an R script</h2>
 <p>We’ve already learned how to submit interactive jobs, but these can be a little cumbersome, as we need to manually type all our commands into R. What if we had an R script that we’d like to run on the HPC. Of course, first we need to load the R script into your personal HPC directory; I do this via the mounted drive on my local computer.</p>
-<p>To submit an R script, we must write a corresponding <code>.sub</code> script which specifies the computational resources we’ll require and what we’d like to run. These <code>.sub</code> files are written using Unix code. Below is an example.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash numberLines"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="co">#!/bin/bash -l</span></span>
-<span id="cb10-2"><a href="#cb10-2"></a><span class="co">#PBS -N myfile                    // NAME of job on lyra</span></span>
-<span id="cb10-3"><a href="#cb10-3"></a><span class="co">#PBS -l ncpus=1                   // number of cores</span></span>
-<span id="cb10-4"><a href="#cb10-4"></a><span class="co">#PBS -l mem=2GB                   // memory allocation for job</span></span>
-<span id="cb10-5"><a href="#cb10-5"></a><span class="co">#PBS -l walltime=1:00:00      // time allocation for job</span></span>
-<span id="cb10-6"><a href="#cb10-6"></a><span class="co">#PBS -e myjob_errors        // where to save the error file</span></span>
-<span id="cb10-7"><a href="#cb10-7"></a><span class="co">#PBS -o myjob_output        // where to save the output file </span></span></code></pre></div>
+<p>To submit an R script, we must write a corresponding <code>.sub</code> script which specifies the computational resources we need and what we’d like to run. These files, written in Unix code, have many names, but in this manual you can think of them as configuration files. Below is an example.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource bash numberLines"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="co">#!/bin/bash -l                  // The Shebang - don&#39;t ask me why!</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="co">#PBS -N myfile                  // NAME of job on lyra</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="co">#PBS -l ncpus=1                 // number of cores</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="co">#PBS -l mem=2GB                 // memory allocation for job</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="co">#PBS -l walltime=1:00:00        // time allocation for job</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="co">#PBS -e myjob_errors            // where to save the error file</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="co">#PBS -o myjob_output            // where to save the output file </span></span></code></pre></div>
 <p><strong>NOTE:</strong> <em>Do not include the backslashes and comments, these cause headaches for Unix. I have included them for instructional purposes only.</em></p>
 <p>The above <code>.sub</code> file is complete, but doesn’t have any commands yet. To run an R script using a <code>.sub</code> script we can add the following lines of code.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash numberLines"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="ex">module</span> load r/4.0.3-foss-2020b</span>
@@ -391,13 +409,13 @@ pre code {
 <p>Instead, we tell R to run the entire <code>ms.R</code> script. Now that we have successfully written a <code>.sub</code> file, we can use it to create a HPC job.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">n9401849@lyra01:~</span><span class="op">&gt;</span> qsub myfile.sub</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">5059221.pbs</span></span></code></pre></div>
-<p>By running <code>qsub &lt;sub_file&gt;</code>, we tell the PBS system to read the file for both the computational resources we required and the code we wish to run. When running a single <code>.sub</code> file, the PBS will acknowledge your request for a job by printing a unique PBS number. In the example above this is <code>5059221.pbs</code>. If you do not see a unique PBS number, then there is something wrong with your <code>.sub</code> file.</p>
+<p>By running <code>qsub &lt;sub_file&gt;</code>, we tell the PBS system to read the file for (1) the computational resources we required and (2) the code we wish to run. When running a single <code>.sub</code> file, the PBS will acknowledge your request for a job by printing a unique Job ID. In the example above this is <code>5059221.pbs</code>. If you do not see a Job ID, then there is something wrong with your <code>.sub</code> file.</p>
 </div>
 <div id="monitoring-the-status-of-jobs" class="section level2">
 <h2>Monitoring the status of jobs</h2>
-<p>The below command provides a summary of the current jobs and their status.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">qstat</span> <span class="at">-u</span> n9401849</span></code></pre></div>
-<p>The monitoring screen looks like this,</p>
+<p>To monitor the status of your submitted jobs run the following command.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">qstat</span> <span class="at">-u</span> <span class="op">&lt;</span>your_qut_id<span class="op">&gt;</span></span></code></pre></div>
+<p>where you replace <code>&lt;your_qut_id&gt;</code> with your number. This command will provide an output like this.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">n9401849@lyra01:~</span><span class="op">&gt;</span> qstat <span class="at">-u</span> n9401849</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pbs:</span></span>
@@ -406,144 +424,80 @@ pre code {
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="ex">--------------------</span> <span class="at">--------</span> <span class="at">--------</span> <span class="at">----------</span> <span class="at">------</span> <span class="at">---</span> <span class="at">---</span> <span class="at">------</span> <span class="at">-----</span> <span class="at">-</span> <span class="at">-----</span></span>
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="ex">5005627.pbs</span>          n9401849 quick    asra1_Ast<span class="pp">*</span>    <span class="at">--</span>    1   1    2gb 01:00 Q   <span class="at">--</span></span>
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="ex">5005628.pbs</span>          n9401849 quick    asra1_CHD<span class="pp">*</span>    <span class="at">--</span>    1   1    2gb 01:00 Q   <span class="at">--</span></span></code></pre></div>
-<p>where most of the columns are not particularly helpful (at least for beginners). The columns we’re interested in are the <code>Req&#39;d Memory</code> and <code>Req&#39;d Time</code> columns which give the amount of memory and time requested in your bash script. If these don’t look right, stop the job. We’ll show you how to stop jobs later, but note that you’ll need to know the <code>Job ID</code> to do so.</p>
-<p>The other column to be interested in is the <code>Elap Time</code> column. Once your job has started (indicated by the <code>S</code> column showing <code>R</code> for that job) the elapsed time column shows how long the job has been running for. Once <code>Elap Time</code> is equal to <code>Req&#39;d Time</code> the job stops — regardless if it has finished or not! For this reason it is always best to slightly overestimate the run time of your models.</p>
+<p>To understand this output I’ll describe each column in turn. Some of these you may be able to guess anyway! - <code>Job ID</code>: The unique job ID provided by the PBS. - <code>Username</code>: Your QUT username that you used to log into the HPC system. - <code>Queue</code>: Based on the computational resources you requested, the PBS categorizes the job using simple descriptive language. For the example above, where we only requested 1 hour of Walltime, the PBS has assigned this job <code>quick</code>. Other options include <code>long</code>.<br />
+- <code>Jobname</code>: The assigned job name that we fed to the HPC via the second line of the <code>.sub</code> file. - <code>SessID</code>: NA - <code>NDS</code>: Number of cores requested - <code>TSK</code>: NA -<code>Req&#39;d Memory</code>: memory allocation for job - <code>Req&#39;d Time</code>: time allocation for job - <code>S</code>: Status of the job. Options include <code>Q</code> (queued), <code>R</code> (running) and <code>E</code> (elapsed). - <code>Elap Time</code>: Elapsed time for the job. Only shows a value once <code>S</code> = <code>R</code>. Once <code>Elap Time</code> is equal to <code>Req&#39;d Time</code> the job stops — regardless if it has finished or not! For this reason it is always best to slightly overestimate the run time of your models.</p>
+<p>If some of these values don’t look right, stop the job and edit your configuration file accordingly before resubmitting. To stop a queued job, run</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">qdel</span> <span class="op">&lt;</span>jobid<span class="op">&gt;</span> // include the .pbs at the end</span></code></pre></div>
 <p>When your models are running the <code>qstat</code> call will look like this.</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">n9401849@lyra01:~</span><span class="op">&gt;</span> qstat <span class="at">-u</span> n9401849</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pbs:</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                                                                 <span class="ex">Req</span><span class="st">&#39;d  Req&#39;</span><span class="ex">d</span>   Elap</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Job</span> ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S Time</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="ex">--------------------</span> <span class="at">--------</span> <span class="at">--------</span> <span class="at">----------</span> <span class="at">------</span> <span class="at">---</span> <span class="at">---</span> <span class="at">------</span> <span class="at">-----</span> <span class="at">-</span> <span class="at">-----</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="ex">5005629.pbs</span>          n9401849 quick    asra1_Ast<span class="pp">*</span>  47118   1   1    2gb 01:00 R 00:01</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="ex">5005630.pbs</span>          n9401849 quick    asra1_CHD<span class="pp">*</span>  47168   1   1    2gb 01:00 R 00:01</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">n9401849@lyra01:~</span><span class="op">&gt;</span> qstat <span class="at">-u</span> n9401849</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pbs:</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                                                                 <span class="ex">Req</span><span class="st">&#39;d  Req&#39;</span><span class="ex">d</span>   Elap</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Job</span> ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S Time</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="ex">--------------------</span> <span class="at">--------</span> <span class="at">--------</span> <span class="at">----------</span> <span class="at">------</span> <span class="at">---</span> <span class="at">---</span> <span class="at">------</span> <span class="at">-----</span> <span class="at">-</span> <span class="at">-----</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="ex">5005629.pbs</span>          n9401849 quick    asra1_Ast<span class="pp">*</span>  47118   1   1    2gb 01:00 R 00:01</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="ex">5005630.pbs</span>          n9401849 quick    asra1_CHD<span class="pp">*</span>  47168   1   1    2gb 01:00 R 00:01</span></code></pre></div>
+<p>In practice, most of the time you’re use of the HPC head node will be to monitor your jobs, so ensure your accustumed to the <code>qstat</code> command.</p>
+<div id="choosing-walltime-and-mem" class="section level3">
+<h3>Choosing <code>walltime</code> and <code>mem</code></h3>
+<p>There is a real art in setting memory and walltime values when running jobs on the HPC.</p>
+<p>Walltime is the total amount of time it will take to complete your job. This includes loading packages, data, compiling, fitting and summarising the model, and saving any output. You must leave sufficient time for all these tasks to be complete as the HPC will stop the job once the <code>walltime</code> has been met. Like most of our scripts, the last commands are always to save our results. To avoid running models for days and then having the results discarded it is best practice to save model results earlier in your scripts if possible. If you wish to save space, you can always tell R at the very end of your script to delete a file. To help guess how long a model will take, I recommend making use of the <code>jf$MCMCrecommendations</code> function which allows one to approximate the run time of a model based on a shorter run of the same model. Of course, this function is an approximation to the run time of the model <strong>only</strong>, it cannot indicate how long model saving or summarising will take.</p>
+<p>Setting the memory value is argueable more difficult. Unlike your local R session which will just run slower if it exceeds your memory, the HPC will just end your job — loosing any modelling done up to that point. To avoid this, it is best practice to run your models with a high value of memory (say 10GB) to start with and then reduce this as necessary. You might think that just setting memory very high is the pragmatic solution. <strong>Please don’t do this!</strong> Firstly, by asking for computational resources you don’t need, you slow the HPC down for everyone. Secondly, by requesting large amounts of memory can make it take substantially longer for the PBS to allocate you a job. For example, if you request 100GB, you might have to wait an hour for the PBS to allocate you a job.</p>
+<p>In R you can assess the size of your objects (say your <code>draws</code> or <code>fit</code> objects) using <code>format(object.size(&lt;object_name&gt;), units = &quot;Mb&quot;)</code>. Remember that R holds all objects in memory. Thus, by summing the size of all the (“large”) objects that you’ll need to have simulateonusly avialable in R, you can glean an initial approximation to the memory value you should specify in your configuration <code>.sub</code> file.</p>
+<p>I find that an iterative process for deciding walltime and memory is most efficient. First, set a reasonably large value for both to begin. After a successful HPC job is complete, the output and error files (which I describe in the next section) provide detailed information about the computational resources it <strong>actually</strong> needed, irrespective of what you requested. By viewing these values, you can find an optimal upper bound for both values.</p>
 </div>
-<div id="choosing-walltime-and-mem" class="section level2">
-<h2>Choosing <code>walltime</code> and <code>mem</code></h2>
-<p>Walltime is the total amount of time it will take to complete your job. This includes loading packages, data, compiling the model, summarising and saving. You must leave sufficient time for all these tasks to be complete as the HPC will stop the job once the <code>walltime</code> has been met. Like most of our scripts, the last job is always to save our results… this is often the task that can be</p>
+<div id="understanding-the-output-file" class="section level3">
+<h3>Understanding the output file</h3>
+<p>Here is an example of the corresponding output file that lyra creates when a job has ended. In (almost!) all cases, lyra will create an output and error file regardless of whether the job was successful. Generally when I refer to success I mean the R script finished running and the required files were successfully saved.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource bash numberLines"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1"></a><span class="ex">R</span> version 4.0.3 <span class="er">(</span><span class="ex">2020-10-10</span><span class="kw">)</span> <span class="ex">--</span> <span class="st">&quot;Bunny-Wunnies Freak Out&quot;</span></span>
+<span id="cb17-2"><a href="#cb17-2"></a><span class="ex">Copyright</span> <span class="er">(</span><span class="ex">C</span><span class="kw">)</span> <span class="ex">2020</span> The R Foundation for Statistical Computing</span>
+<span id="cb17-3"><a href="#cb17-3"></a><span class="ex">Platform:</span> x86_64-pc-linux-gnu <span class="er">(</span><span class="ex">64-bit</span><span class="kw">)</span></span>
+<span id="cb17-4"><a href="#cb17-4"></a></span>
+<span id="cb17-5"><a href="#cb17-5"></a><span class="ex">R</span> is free software and comes with ABSOLUTELY NO WARRANTY.</span>
+<span id="cb17-6"><a href="#cb17-6"></a><span class="ex">You</span> are welcome to redistribute it under certain conditions.</span>
+<span id="cb17-7"><a href="#cb17-7"></a><span class="ex">Type</span> <span class="st">&#39;license()&#39;</span> or <span class="st">&#39;licence()&#39;</span> for distribution details.</span>
+<span id="cb17-8"><a href="#cb17-8"></a></span>
+<span id="cb17-9"><a href="#cb17-9"></a>  <span class="ex">Natural</span> language support but running in an English locale</span>
+<span id="cb17-10"><a href="#cb17-10"></a></span>
+<span id="cb17-11"><a href="#cb17-11"></a><span class="ex">R</span> is a collaborative project with many contributors.</span>
+<span id="cb17-12"><a href="#cb17-12"></a><span class="ex">Type</span> <span class="st">&#39;contributors()&#39;</span> for more information and</span>
+<span id="cb17-13"><a href="#cb17-13"></a><span class="st">&#39;citation()&#39;</span> on how to cite R or R packages in publications.</span>
+<span id="cb17-14"><a href="#cb17-14"></a></span>
+<span id="cb17-15"><a href="#cb17-15"></a><span class="ex">Type</span> <span class="st">&#39;demo()&#39;</span> for some demos, <span class="st">&#39;help()&#39;</span> for on-line help, or</span>
+<span id="cb17-16"><a href="#cb17-16"></a><span class="st">&#39;help.start()&#39;</span> for an HTML browser interface to help.</span>
+<span id="cb17-17"><a href="#cb17-17"></a><span class="ex">Type</span> <span class="st">&#39;q()&#39;</span> to quit R.</span>
+<span id="cb17-18"><a href="#cb17-18"></a></span>
+<span id="cb17-19"><a href="#cb17-19"></a><span class="op">&gt;</span> .libPaths<span class="kw">(</span><span class="st">&#39;r_lib&#39;</span><span class="kw">);</span></span>
+<span id="cb17-20"><a href="#cb17-20"></a><span class="op">&gt;</span> base_folder=<span class="st">&#39;QUTHPC_training&#39;</span><span class="kw">;</span></span>
+<span id="cb17-21"><a href="#cb17-21"></a><span class="op">&gt;</span> model_spec=<span class="st">&#39;asra1&#39;</span><span class="kw">;</span></span>
+<span id="cb17-22"><a href="#cb17-22"></a><span class="op">&gt;</span> sex=<span class="st">&#39;Female&#39;</span><span class="kw">;</span></span>
+<span id="cb17-23"><a href="#cb17-23"></a><span class="op">&gt;</span> condition=<span class="st">&#39;Asthma&#39;</span><span class="kw">;</span></span>
+<span id="cb17-24"><a href="#cb17-24"></a><span class="op">&gt;</span> Rfile=<span class="st">&#39;asra1_Asthma_Female&#39;</span><span class="kw">;</span></span>
+<span id="cb17-25"><a href="#cb17-25"></a><span class="op">&gt;</span> cur_date=<span class="st">&#39;20230815&#39;</span><span class="kw">;</span></span>
+<span id="cb17-26"><a href="#cb17-26"></a><span class="op">&gt;</span> niter=800<span class="kw">;</span></span>
+<span id="cb17-27"><a href="#cb17-27"></a><span class="op">&gt;</span> nburnin=400<span class="kw">;</span></span>
+<span id="cb17-28"><a href="#cb17-28"></a><span class="op">&gt;</span> thin=1<span class="kw">;</span></span>
+<span id="cb17-29"><a href="#cb17-29"></a><span class="op">&gt;</span> nchains=4<span class="kw">;</span></span>
+<span id="cb17-30"><a href="#cb17-30"></a><span class="op">&gt;</span> source<span class="kw">(</span><span class="st">&#39;QUTHPC_training/ms.R&#39;</span><span class="kw">);</span></span>
+<span id="cb17-31"><a href="#cb17-31"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
+<span id="cb17-32"><a href="#cb17-32"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
+<span id="cb17-33"><a href="#cb17-33"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
+<span id="cb17-34"><a href="#cb17-34"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
+<span id="cb17-35"><a href="#cb17-35"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
+<span id="cb17-36"><a href="#cb17-36"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
+<span id="cb17-37"><a href="#cb17-37"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
+<span id="cb17-38"><a href="#cb17-38"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
+<span id="cb17-39"><a href="#cb17-39"></a><span class="op">&gt;</span> </span>
+<span id="cb17-40"><a href="#cb17-40"></a><span class="op">&gt;</span> </span>
+<span id="cb17-41"><a href="#cb17-41"></a><span class="ex">PBS</span> Job 5005634.pbs</span>
+<span id="cb17-42"><a href="#cb17-42"></a><span class="ex">CPU</span> time  : 00:04:10</span>
+<span id="cb17-43"><a href="#cb17-43"></a><span class="ex">Wall</span> time : 00:05:50</span>
+<span id="cb17-44"><a href="#cb17-44"></a><span class="ex">Mem</span> usage : 2097152kb</span></code></pre></div>
+<p>The output file is very useful in determining the computational resources that were <strong>actually</strong> used by the HPC during the running of the job. These details are available from line 41 above. Note that CPU time and walltime are unique metrics. We’re only interested in the walltime as this is what we actually set in the configuration file. In the example above, the HPC job ended after 5 mins and 50 seconds and used 2.097152 Gb of memory. Using the iterative method proposed above, we might consider setting the memory at 3GB and the walltime at 10 mins.</p>
 </div>
-<div id="understanding-the-output-file" class="section level2">
-<h2>Understanding the output file</h2>
-<p>Here is an example of the corresponding output file that lyra creates when a job has stopped. In (almost!) all cases, lyra will create an output and error file regardless of whether the job was successful. Generally when I refer to success I mean the R script finished running and the required files were successfully saved.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> version 4.0.3 <span class="er">(</span><span class="ex">2020-10-10</span><span class="kw">)</span> <span class="ex">--</span> <span class="st">&quot;Bunny-Wunnies Freak Out&quot;</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Copyright</span> <span class="er">(</span><span class="ex">C</span><span class="kw">)</span> <span class="ex">2020</span> The R Foundation for Statistical Computing</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Platform:</span> x86_64-pc-linux-gnu <span class="er">(</span><span class="ex">64-bit</span><span class="kw">)</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> is free software and comes with ABSOLUTELY NO WARRANTY.</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="ex">You</span> are welcome to redistribute it under certain conditions.</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="ex">Type</span> <span class="st">&#39;license()&#39;</span> or <span class="st">&#39;licence()&#39;</span> for distribution details.</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="ex">Natural</span> language support but running in an English locale</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> is a collaborative project with many contributors.</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="ex">Type</span> <span class="st">&#39;contributors()&#39;</span> for more information and</span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;citation()&#39;</span> on how to cite R or R packages in publications.</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="ex">Type</span> <span class="st">&#39;demo()&#39;</span> for some demos, <span class="st">&#39;help()&#39;</span> for on-line help, or</span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;help.start()&#39;</span> for an HTML browser interface to help.</span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="ex">Type</span> <span class="st">&#39;q()&#39;</span> to quit R.</span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> .libPaths<span class="kw">(</span><span class="st">&#39;r_lib&#39;</span><span class="kw">);</span></span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> base_folder=<span class="st">&#39;QUTHPC_training&#39;</span><span class="kw">;</span></span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> model_spec=<span class="st">&#39;asra1&#39;</span><span class="kw">;</span></span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> sex=<span class="st">&#39;Female&#39;</span><span class="kw">;</span></span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> condition=<span class="st">&#39;Asthma&#39;</span><span class="kw">;</span></span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> Rfile=<span class="st">&#39;asra1_Asthma_Female&#39;</span><span class="kw">;</span></span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> cur_date=<span class="st">&#39;20230815&#39;</span><span class="kw">;</span></span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> niter=800<span class="kw">;</span></span>
-<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> nburnin=400<span class="kw">;</span></span>
-<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> thin=1<span class="kw">;</span></span>
-<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> nchains=4<span class="kw">;</span></span>
-<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> source<span class="kw">(</span><span class="st">&#39;QUTHPC_training/ms.R&#39;</span><span class="kw">);</span></span>
-<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
-<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
-<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
-<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
-<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
-<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
-<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span><span class="ex">-------------</span><span class="kw">|</span></span>
-<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span><span class="ex">-------------------------------------------------------</span><span class="kw">|</span></span>
-<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> </span>
-<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> </span>
-<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a><span class="ex">PBS</span> Job 5005634.pbs</span>
-<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a><span class="ex">CPU</span> time  : 00:04:10</span>
-<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a><span class="ex">Wall</span> time : 00:05:50</span>
-<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a><span class="ex">Mem</span> usage : 2097152kb</span></code></pre></div>
-</div>
-<div id="understanding-the-error-file" class="section level2">
-<h2>Understanding the error file</h2>
-<p>Here is an example of the corresponding error file that corresponds to a specific job.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> ggplot2 3.3.5     ✔ purrr   0.3.4</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> tibble  3.1.5     ✔ dplyr   1.0.7</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> tidyr   1.1.4     ✔ stringr 1.4.0</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> readr   2.1.1     ✔ forcats 0.5.1</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> Conflicts ────────────────────────────────────────── tidyverse_conflicts<span class="er">(</span><span class="kw">)</span> <span class="ex">──</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="ex">✖</span> dplyr::filter<span class="er">(</span><span class="kw">)</span> <span class="ex">masks</span> stats::filter<span class="er">(</span><span class="kw">)</span></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="ex">✖</span> dplyr::lag<span class="er">(</span><span class="kw">)</span>    <span class="ex">masks</span> stats::lag<span class="er">(</span><span class="kw">)</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="ex">Linking</span> to GEOS 3.9.1, GDAL 3.2.1, PROJ 7.2.1</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="ex">Loading</span> required package: sp</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="ex">Loading</span> required package: spData</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="ex">To</span> access larger datasets in this package, install the spDataLarge</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="ex">package</span> with: <span class="kw">`</span><span class="ex">install.packages</span><span class="er">(</span><span class="st">&#39;spDataLarge&#39;</span><span class="ex">,</span></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="va">repos=</span><span class="st">&#39;https://nowosad.github.io/drat/&#39;</span>, <span class="va">type=</span><span class="st">&#39;source&#39;</span><span class="er">)</span><span class="kw">`</span></span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="ex">nimble</span> version 0.12.2 is loaded.</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="ex">For</span> more information on NIMBLE and a User Manual,</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="ex">please</span> visit https://R-nimble.org.</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="ex">Attaching</span> package: ‘nimble’</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> following object is masked from ‘package:stats’:</span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>    <span class="ex">simulate</span></span>
-<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a><span class="ex">Attaching</span> package: ‘Matrix’</span>
-<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> following objects are masked from ‘package:tidyr’:</span>
-<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>    <span class="ex">expand,</span> pack, unpack</span>
-<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a><span class="ex">This</span> is bayesplot version 1.8.1</span>
-<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a><span class="ex">-</span> Online documentation and vignettes at mc-stan.org/bayesplot</span>
-<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a><span class="ex">-</span> bayesplot theme set to bayesplot::theme_default<span class="er">(</span><span class="kw">)</span></span>
-<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>   <span class="ex">*</span> Does _not_ affect other ggplot2 plots</span>
-<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>   <span class="ex">*</span> See <span class="pp">?</span>bayesplot_theme_set for details on theme setting</span>
-<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a><span class="ex">Defining</span> model</span>
-<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a><span class="ex">Building</span> model</span>
-<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a><span class="ex">Setting</span> data and initial values</span>
-<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> calculate on model</span>
-<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> Any error reports that follow may simply reflect missing values in model variables.</span>
-<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a><span class="ex">Checking</span> model sizes and dimensions</span>
-<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> All model variables are initialized.</span>
-<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a><span class="ex">Compiling</span></span>
-<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> This may take a minute.</span>
-<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> Use <span class="st">&#39;showCompilerOutput = TRUE&#39;</span> to see C++ compilation details.</span>
-<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a><span class="ex">Compiling</span></span>
-<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> This may take a minute.</span>
-<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> Use <span class="st">&#39;showCompilerOutput = TRUE&#39;</span> to see C++ compilation details.</span>
-<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a><span class="ex">Starting</span> sampling for 400 iterations for each of 4 chains.</span>
-<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 1 ...</span>
-<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 2 ...</span>
-<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 3 ...</span>
-<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 4 ...</span>
-<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a><span class="ex">Sampling</span> took 0.92 mins</span>
-<span id="cb17-56"><a href="#cb17-56" aria-hidden="true" tabindex="-1"></a><span class="ex">Median</span> Rhat: 1 </span>
-<span id="cb17-57"><a href="#cb17-57" aria-hidden="true" tabindex="-1"></a><span class="ex">0.01%</span> of Rhats larger than 1.01 </span>
-<span id="cb17-58"><a href="#cb17-58" aria-hidden="true" tabindex="-1"></a><span class="ex">Max</span> Rhat = 1.01 <span class="er">(</span><span class="ex">sigma</span><span class="kw">)</span> </span>
-<span id="cb17-59"><a href="#cb17-59" aria-hidden="true" tabindex="-1"></a><span class="ex">0.01%</span> of ess_bulk are too small </span>
-<span id="cb17-60"><a href="#cb17-60" aria-hidden="true" tabindex="-1"></a><span class="ex">Min</span> ess_bulk = 311.19 <span class="er">(</span><span class="ex">sigma</span><span class="kw">)</span> </span>
-<span id="cb17-61"><a href="#cb17-61" aria-hidden="true" tabindex="-1"></a><span class="ex">0.01%</span> of ess_tail are too small </span>
-<span id="cb17-62"><a href="#cb17-62" aria-hidden="true" tabindex="-1"></a><span class="ex">Min</span> ess_tail = 285.74 <span class="er">(</span><span class="ex">sigma</span><span class="kw">)</span> </span>
-<span id="cb17-63"><a href="#cb17-63" aria-hidden="true" tabindex="-1"></a><span class="ex">Average</span> posterior draws per minute: </span>
-<span id="cb17-64"><a href="#cb17-64" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Point estimates...</span>
-<span id="cb17-65"><a href="#cb17-65" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Standard errors...</span>
-<span id="cb17-66"><a href="#cb17-66" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Highest density intervals...</span>
-<span id="cb17-67"><a href="#cb17-67" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Point estimates...</span>
-<span id="cb17-68"><a href="#cb17-68" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Standard errors...</span>
-<span id="cb17-69"><a href="#cb17-69" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Highest density intervals...</span></code></pre></div>
-<p>As you can observe this provides some of the output from <code>R</code> like you would see in <code>Rstudio</code> on your local machine.</p>
-<p>The examples above are for successful jobs. Below is an example error script when a job is stopped early due to an error in <code>R</code>.</p>
+<div id="understanding-the-error-file" class="section level3">
+<h3>Understanding the error file</h3>
+<p>Here is an example of the error file a successful HPC job where we ran a simple <code>nimble</code> model.</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> ggplot2 3.3.5     ✔ purrr   0.3.4</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> tibble  3.1.5     ✔ dplyr   1.0.7</span>
@@ -580,42 +534,179 @@ pre code {
 <span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a><span class="ex">-</span> bayesplot theme set to bayesplot::theme_default<span class="er">(</span><span class="kw">)</span></span>
 <span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>   <span class="ex">*</span> Does _not_ affect other ggplot2 plots</span>
 <span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>   <span class="ex">*</span> See <span class="pp">?</span>bayesplot_theme_set for details on theme setting</span>
-<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a><span class="ex">Error</span> in file<span class="er">(</span><span class="ex">filename,</span> <span class="st">&quot;r&quot;</span>, encoding = encoding<span class="kw">)</span> <span class="bu">:</span> </span>
-<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>  <span class="ex">cannot</span> open the connection</span>
-<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a><span class="ex">Calls:</span> source <span class="at">-</span><span class="op">&gt;</span> withVisible <span class="at">-</span><span class="op">&gt;</span> eval <span class="at">-</span><span class="op">&gt;</span> eval <span class="at">-</span><span class="op">&gt;</span> source <span class="at">-</span><span class="op">&gt;</span> file</span>
-<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a><span class="ex">In</span> addition: Warning message:</span>
-<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a><span class="ex">In</span> file<span class="er">(</span><span class="ex">filename,</span> <span class="st">&quot;r&quot;</span>, encoding = encoding<span class="kw">)</span> <span class="bu">:</span></span>
-<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a>  <span class="ex">cannot</span> open file <span class="st">&#39;QUTHPC_training/r_src/asra2.R&#39;</span>: No such file or directory</span>
-<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a><span class="ex">Execution</span> halted</span></code></pre></div>
-<p>In the above example, the job was stopped early due to a directory issue.</p>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a><span class="ex">Defining</span> model</span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a><span class="ex">Building</span> model</span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a><span class="ex">Setting</span> data and initial values</span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> calculate on model</span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> Any error reports that follow may simply reflect missing values in model variables.</span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a><span class="ex">Checking</span> model sizes and dimensions</span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> All model variables are initialized.</span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a><span class="ex">Compiling</span></span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> This may take a minute.</span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> Use <span class="st">&#39;showCompilerOutput = TRUE&#39;</span> to see C++ compilation details.</span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a><span class="ex">Compiling</span></span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> This may take a minute.</span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a>  <span class="ex">[Note]</span> Use <span class="st">&#39;showCompilerOutput = TRUE&#39;</span> to see C++ compilation details.</span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a><span class="ex">Starting</span> sampling for 400 iterations for each of 4 chains.</span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 1 ...</span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 2 ...</span>
+<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 3 ...</span>
+<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a><span class="ex">Running</span> chain 4 ...</span>
+<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a><span class="ex">Sampling</span> took 0.92 mins</span>
+<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a><span class="ex">Median</span> Rhat: 1 </span>
+<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a><span class="ex">0.01%</span> of Rhats larger than 1.01 </span>
+<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a><span class="ex">Max</span> Rhat = 1.01 <span class="er">(</span><span class="ex">sigma</span><span class="kw">)</span> </span>
+<span id="cb18-59"><a href="#cb18-59" aria-hidden="true" tabindex="-1"></a><span class="ex">0.01%</span> of ess_bulk are too small </span>
+<span id="cb18-60"><a href="#cb18-60" aria-hidden="true" tabindex="-1"></a><span class="ex">Min</span> ess_bulk = 311.19 <span class="er">(</span><span class="ex">sigma</span><span class="kw">)</span> </span>
+<span id="cb18-61"><a href="#cb18-61" aria-hidden="true" tabindex="-1"></a><span class="ex">0.01%</span> of ess_tail are too small </span>
+<span id="cb18-62"><a href="#cb18-62" aria-hidden="true" tabindex="-1"></a><span class="ex">Min</span> ess_tail = 285.74 <span class="er">(</span><span class="ex">sigma</span><span class="kw">)</span> </span>
+<span id="cb18-63"><a href="#cb18-63" aria-hidden="true" tabindex="-1"></a><span class="ex">Average</span> posterior draws per minute: </span>
+<span id="cb18-64"><a href="#cb18-64" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Point estimates...</span>
+<span id="cb18-65"><a href="#cb18-65" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Standard errors...</span>
+<span id="cb18-66"><a href="#cb18-66" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Highest density intervals...</span>
+<span id="cb18-67"><a href="#cb18-67" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Point estimates...</span>
+<span id="cb18-68"><a href="#cb18-68" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Standard errors...</span>
+<span id="cb18-69"><a href="#cb18-69" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Highest density intervals...</span></code></pre></div>
+<p>Unlike the output file, the error file is useful for diagnosing errors produced by R during the HPC job. This is becuase the output file provides some of the output from <code>R</code> like you would see in <code>Rstudio</code> on your local machine.</p>
+<p>Below is an example error file for when a job is stopped early due to an <code>R</code> error.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> ggplot2 3.3.5     ✔ purrr   0.3.4</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> tibble  3.1.5     ✔ dplyr   1.0.7</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> tidyr   1.1.4     ✔ stringr 1.4.0</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> readr   2.1.1     ✔ forcats 0.5.1</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> Conflicts ────────────────────────────────────────── tidyverse_conflicts<span class="er">(</span><span class="kw">)</span> <span class="ex">──</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="ex">✖</span> dplyr::filter<span class="er">(</span><span class="kw">)</span> <span class="ex">masks</span> stats::filter<span class="er">(</span><span class="kw">)</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="ex">✖</span> dplyr::lag<span class="er">(</span><span class="kw">)</span>    <span class="ex">masks</span> stats::lag<span class="er">(</span><span class="kw">)</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="ex">Linking</span> to GEOS 3.9.1, GDAL 3.2.1, PROJ 7.2.1</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="ex">Loading</span> required package: sp</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="ex">Loading</span> required package: spData</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="ex">To</span> access larger datasets in this package, install the spDataLarge</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="ex">package</span> with: <span class="kw">`</span><span class="ex">install.packages</span><span class="er">(</span><span class="st">&#39;spDataLarge&#39;</span><span class="ex">,</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="va">repos=</span><span class="st">&#39;https://nowosad.github.io/drat/&#39;</span>, <span class="va">type=</span><span class="st">&#39;source&#39;</span><span class="er">)</span><span class="kw">`</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="ex">nimble</span> version 0.12.2 is loaded.</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a><span class="ex">For</span> more information on NIMBLE and a User Manual,</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a><span class="ex">please</span> visit https://R-nimble.org.</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a><span class="ex">Attaching</span> package: ‘nimble’</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> following object is masked from ‘package:stats’:</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    <span class="ex">simulate</span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a><span class="ex">Attaching</span> package: ‘Matrix’</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> following objects are masked from ‘package:tidyr’:</span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>    <span class="ex">expand,</span> pack, unpack</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a><span class="ex">This</span> is bayesplot version 1.8.1</span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a><span class="ex">-</span> Online documentation and vignettes at mc-stan.org/bayesplot</span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a><span class="ex">-</span> bayesplot theme set to bayesplot::theme_default<span class="er">(</span><span class="kw">)</span></span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>   <span class="ex">*</span> Does _not_ affect other ggplot2 plots</span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>   <span class="ex">*</span> See <span class="pp">?</span>bayesplot_theme_set for details on theme setting</span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a><span class="ex">Error</span> in file<span class="er">(</span><span class="ex">filename,</span> <span class="st">&quot;r&quot;</span>, encoding = encoding<span class="kw">)</span> <span class="bu">:</span> </span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>  <span class="ex">cannot</span> open the connection</span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a><span class="ex">Calls:</span> source <span class="at">-</span><span class="op">&gt;</span> withVisible <span class="at">-</span><span class="op">&gt;</span> eval <span class="at">-</span><span class="op">&gt;</span> eval <span class="at">-</span><span class="op">&gt;</span> source <span class="at">-</span><span class="op">&gt;</span> file</span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a><span class="ex">In</span> addition: Warning message:</span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a><span class="ex">In</span> file<span class="er">(</span><span class="ex">filename,</span> <span class="st">&quot;r&quot;</span>, encoding = encoding<span class="kw">)</span> <span class="bu">:</span></span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>  <span class="ex">cannot</span> open file <span class="st">&#39;QUTHPC_training/r_src/asra2.R&#39;</span>: No such file or directory</span>
+<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a><span class="ex">Execution</span> halted</span></code></pre></div>
+<p>As you can see, the job was stopped early due to a directory issue.</p>
 </div>
-<div id="incorrect-memory-allocation" class="section level2">
-<h2>Incorrect memory allocation</h2>
-<p>In the error file you might see this line.</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/var/spool/PBS/mom_priv/jobs/5059208.pbs.SC:</span> line 23: 47174 Killed</span></code></pre></div>
+<div id="understanding-lyra-errors" class="section level3">
+<h3>Understanding Lyra errors</h3>
+<p>Hopefully you now understand the power of the error and output files produced by lyra. Fortunately lyra also produces helpful output when jobs are stopped due to exceeded computational resources. If your memory allocation is exceeded, you might observe the following line in the error file.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/var/spool/PBS/mom_priv/jobs/5059208.pbs.SC:</span> line 23: 47174 Killed</span></code></pre></div>
 <p>While in the output file you might see</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Mem</span> usage : 2097152kb</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Mem</span> usage : 2097152kb</span></code></pre></div>
 <p>which has clearly exceeded the memory of 2GB we set. Remember there are 1 million kb in a GB.</p>
-</div>
-<div id="incorrect-time-allocated" class="section level2">
-<h2>Incorrect time allocated</h2>
-<p>Sometimes you might underestimate how long your model will take to run, resulting in the HPC stopping your job before it’s done.</p>
-<p>In the error file you will see something like</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">=</span><span class="op">&gt;&gt;</span> PBS: job killed: walltime 77 exceeded limit 60</span></code></pre></div>
+<p>If you job has continued to run past its allocated walltime, the PBS will automatically stop the job. In this case, the error file might say</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="ex">=</span><span class="op">&gt;&gt;</span> PBS: job killed: walltime 77 exceeded limit 60</span></code></pre></div>
 <p>While in the output file you’ll see</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="ex">CPU</span> time  : 00:00:59</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Wall</span> time : 00:01:28</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Mem</span> usage : 1029864kb</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">CPU</span> time  : 00:00:59</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Wall</span> time : 00:01:28</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Mem</span> usage : 1029864kb</span></code></pre></div>
 <p>which clearly shows that we’ve exceeded the time limit we set of 1 minute.</p>
-</div>
-<div id="other-errors" class="section level2">
-<h2>Other errors</h2>
 <p>Sometimes an error will occur that is unique and potentially one that cannot be described in the standard error and output files. In these instances you will receive an automated email from the HPC system that may look like this.</p>
-<div class="figure">
-<img src="data:image/png;base64,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" alt />
-<p class="caption">alt text here</p>
+<p><img src="data:image/png;base64,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" /></p>
+<p>If this happens please contact me. In most cases, this is a result of an error in the HPC system.</p>
 </div>
-<p>If this happens please contact me. In most cases, these are a result of an error in the HPC system.</p>
+</div>
+</div>
+<div id="batch-running-of-jobs" class="section level1">
+<h1>Batch running of jobs</h1>
+<div id="basic-unix-code---again" class="section level2">
+<h2>Basic Unix code - again</h2>
+<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash numberLines"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb24-2"><a href="#cb24-2"></a></span>
+<span id="cb24-3"><a href="#cb24-3"></a><span class="va">base_folder=</span><span class="st">&#39;QUTHPC_training/batch&#39;</span></span>
+<span id="cb24-4"><a href="#cb24-4"></a></span>
+<span id="cb24-5"><a href="#cb24-5"></a><span class="co"># Model</span></span>
+<span id="cb24-6"><a href="#cb24-6"></a><span class="cf">for</span> model_spec <span class="kw">in</span> asra1 asra2 <span class="co">## Name of file that runs the model</span></span>
+<span id="cb24-7"><a href="#cb24-7"></a><span class="cf">do</span></span>
+<span id="cb24-8"><a href="#cb24-8"></a>    </span>
+<span id="cb24-9"><a href="#cb24-9"></a>    <span class="co"># Sex</span></span>
+<span id="cb24-10"><a href="#cb24-10"></a>    <span class="cf">for</span> sex <span class="kw">in</span> Persons Female Male</span>
+<span id="cb24-11"><a href="#cb24-11"></a>    <span class="cf">do</span></span>
+<span id="cb24-12"><a href="#cb24-12"></a>    </span>
+<span id="cb24-13"><a href="#cb24-13"></a>        <span class="co"># Condition</span></span>
+<span id="cb24-14"><a href="#cb24-14"></a>        <span class="cf">for</span> condition <span class="kw">in</span> Asthma CHD</span>
+<span id="cb24-15"><a href="#cb24-15"></a>        <span class="cf">do</span></span>
+<span id="cb24-16"><a href="#cb24-16"></a>    </span>
+<span id="cb24-17"><a href="#cb24-17"></a>            <span class="co"># create the unique file name</span></span>
+<span id="cb24-18"><a href="#cb24-18"></a>            <span class="va">Rfile=$model_spec</span><span class="st">&#39;_&#39;</span><span class="va">$condition</span><span class="st">&#39;_&#39;</span><span class="va">$sex</span></span>
+<span id="cb24-19"><a href="#cb24-19"></a>    </span>
+<span id="cb24-20"><a href="#cb24-20"></a>            <span class="co"># get the current date</span></span>
+<span id="cb24-21"><a href="#cb24-21"></a>            <span class="va">cur_date=$(</span><span class="fu">date</span> +%Y%m%d<span class="va">)</span></span>
+<span id="cb24-22"><a href="#cb24-22"></a>        </span>
+<span id="cb24-23"><a href="#cb24-23"></a>            <span class="co"># create directories</span></span>
+<span id="cb24-24"><a href="#cb24-24"></a>            <span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$base_folder</span>/sub_src/<span class="va">$cur_date</span></span>
+<span id="cb24-25"><a href="#cb24-25"></a>            <span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$base_folder</span>/outputs/lyra</span>
+<span id="cb24-26"><a href="#cb24-26"></a>            <span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$base_folder</span>/outputs/lyra/<span class="va">$cur_date</span>/errors</span>
+<span id="cb24-27"><a href="#cb24-27"></a>            <span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$base_folder</span>/outputs/lyra/<span class="va">$cur_date</span>/out</span>
+<span id="cb24-28"><a href="#cb24-28"></a>            <span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$base_folder</span>/outputs/<span class="va">$condition</span></span>
+<span id="cb24-29"><a href="#cb24-29"></a>            <span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$base_folder</span>/outputs/<span class="va">$condition</span>/<span class="va">$sex</span></span>
+<span id="cb24-30"><a href="#cb24-30"></a>            </span>
+<span id="cb24-31"><a href="#cb24-31"></a>            <span class="co"># Set loop output file with full directory</span></span>
+<span id="cb24-32"><a href="#cb24-32"></a>            <span class="va">loop_output_file=$base_folder</span><span class="st">&#39;/outputs/&#39;</span><span class="va">$condition</span><span class="st">&#39;/&#39;</span><span class="va">$sex</span><span class="st">&#39;/&#39;</span><span class="va">$Rfile</span></span>
+<span id="cb24-33"><a href="#cb24-33"></a></span>
+<span id="cb24-34"><a href="#cb24-34"></a>            <span class="co"># create the unique .sub script files</span></span>
+<span id="cb24-35"><a href="#cb24-35"></a>            <span class="va">file=$Rfile</span><span class="st">&#39;.sub&#39;</span></span>
+<span id="cb24-36"><a href="#cb24-36"></a></span>
+<span id="cb24-37"><a href="#cb24-37"></a>            <span class="co"># paste the commands in the .sub scripts</span></span>
+<span id="cb24-38"><a href="#cb24-38"></a>            <span class="fu">cat</span> <span class="op">&gt;</span> <span class="va">$base_folder</span>/sub_src/<span class="va">$cur_date</span>/<span class="va">$file</span> <span class="op">&lt;&lt;EOF</span></span>
+<span id="cb24-39"><a href="#cb24-39"></a><span class="st">#!/bin/bash -l</span></span>
+<span id="cb24-40"><a href="#cb24-40"></a><span class="st">#PBS -N </span><span class="va">$Rfile</span></span>
+<span id="cb24-41"><a href="#cb24-41"></a><span class="st">#PBS -l ncpus=1</span></span>
+<span id="cb24-42"><a href="#cb24-42"></a><span class="st">#PBS -l mem=2GB</span></span>
+<span id="cb24-43"><a href="#cb24-43"></a><span class="st">#PBS -l walltime=0:20:00</span></span>
+<span id="cb24-44"><a href="#cb24-44"></a><span class="st">#PBS -e </span><span class="va">$base_folder</span><span class="st">/outputs/lyra/</span><span class="va">$cur_date</span><span class="st">/lyra_errors/</span><span class="va">$Rfile</span></span>
+<span id="cb24-45"><a href="#cb24-45"></a><span class="st">#PBS -o </span><span class="va">$base_folder</span><span class="st">/outputs/lyra/</span><span class="va">$cur_date</span><span class="st">/lyra_out/</span><span class="va">$Rfile</span></span>
+<span id="cb24-46"><a href="#cb24-46"></a></span>
+<span id="cb24-47"><a href="#cb24-47"></a><span class="st">module load r/4.0.3-foss-2020b</span></span>
+<span id="cb24-48"><a href="#cb24-48"></a><span class="st">module load gdal/3.2.1-foss-2020b</span></span>
+<span id="cb24-49"><a href="#cb24-49"></a></span>
+<span id="cb24-50"><a href="#cb24-50"></a><span class="st">R -e &quot;.libPaths(&#39;r_lib&#39;);</span></span>
+<span id="cb24-51"><a href="#cb24-51"></a><span class="st">base_folder=&#39;</span><span class="va">$base_folder</span><span class="st">&#39;;</span></span>
+<span id="cb24-52"><a href="#cb24-52"></a><span class="st">loop_output_file=&#39;</span><span class="va">$loop_output_file</span><span class="st">&#39;;</span></span>
+<span id="cb24-53"><a href="#cb24-53"></a><span class="st">model_spec=&#39;</span><span class="va">$model_spec</span><span class="st">&#39;;</span></span>
+<span id="cb24-54"><a href="#cb24-54"></a><span class="st">sex=&#39;</span><span class="va">$sex</span><span class="st">&#39;;</span></span>
+<span id="cb24-55"><a href="#cb24-55"></a><span class="st">condition=&#39;</span><span class="va">$condition</span><span class="st">&#39;;</span></span>
+<span id="cb24-56"><a href="#cb24-56"></a><span class="st">cur_date=&#39;</span><span class="va">$cur_date</span><span class="st">&#39;;</span></span>
+<span id="cb24-57"><a href="#cb24-57"></a><span class="st">niter=800;</span></span>
+<span id="cb24-58"><a href="#cb24-58"></a><span class="st">nburnin=400;</span></span>
+<span id="cb24-59"><a href="#cb24-59"></a><span class="st">thin=1;</span></span>
+<span id="cb24-60"><a href="#cb24-60"></a><span class="st">nchains=4;</span></span>
+<span id="cb24-61"><a href="#cb24-61"></a><span class="st">source(&#39;</span><span class="va">$base_folder</span><span class="st">/ms.R&#39;);&quot;</span></span>
+<span id="cb24-62"><a href="#cb24-62"></a><span class="op">EOF</span></span>
+<span id="cb24-63"><a href="#cb24-63"></a></span>
+<span id="cb24-64"><a href="#cb24-64"></a>            <span class="co"># run each script</span></span>
+<span id="cb24-65"><a href="#cb24-65"></a>            <span class="ex">qsub</span> <span class="va">$base_folder</span>/sub_src/<span class="va">$cur_date</span>/<span class="va">$file</span></span>
+<span id="cb24-66"><a href="#cb24-66"></a></span>
+<span id="cb24-67"><a href="#cb24-67"></a>        <span class="cf">done</span></span>
+<span id="cb24-68"><a href="#cb24-68"></a>    <span class="cf">done</span></span>
+<span id="cb24-69"><a href="#cb24-69"></a><span class="cf">done</span></span></code></pre></div>
 </div>
 </div>
 

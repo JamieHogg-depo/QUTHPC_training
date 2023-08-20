@@ -2,6 +2,7 @@
 title: "QUT HPC Manual"
 output:
   html_document:
+    toc: true
     highlight: tango
 ---
 
@@ -9,11 +10,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## QUT HPC Manual
-
 This document stands as a stripped back manual for successfully operating the Queensland University of Technologies (QUT) High Performance Computing (HPC) system for staff at the DOHWA. 
-
-## Background
 
 - I won't try to explain or teach Unix/Bash code
 - I am not a programmer
@@ -29,7 +26,7 @@ This document stands as a stripped back manual for successfully operating the Qu
 	- 1 hour of running a batch of models
 - Pre-training to install packages
 
-## Logging in for the first time 
+# Logging in for the first time 
 
 Open command prompt and type
 
@@ -89,7 +86,7 @@ n9401849@lyra01:~>
 
 The Lyra head node is what I call the "entrance" to the HPC. Think of it like the lobby of a hotel: you don't spend much time there or do anything considerable (like running a model!), but you have to go through it each time you wish to enter or leave your room. Furthermore if you'd like to change your room or make a request (submit a job to the HPC) you have to go to the lobby to do so (at least before we had phones!). 
 
-# Some basic Bash/Unix code
+## Some basic Bash/Unix code
 
 The QUT HPC runs on a programming language called Bash or Unix. The two languages are similar but not identical. That said, the distinction is not important here. Let's explore some simple Unix code to get started.  
 
@@ -114,7 +111,7 @@ You should see the normal R information printed to your console. To return to th
 
 You'll notice that we ran a strange command starting with `module load `. Modules are pieces of software that are available from the QUT HPC - there are absolutely loads! If all were loaded every time we opened Lyra, we would be waiting for a **long** time. Instead, we have to tell Lyra what modules we'd like to use. In the case above I told the QUT HPC that I would like to use R version 4.0.3. At the time of writing, this is the most recent version of R available to HPC users.  
 
-## Your first HPC job - installing R packages
+# Your first HPC job - installing R packages
 
 As you might expect loading the R module only loads base R packages. To install packages we'll learn how to exit the Lyra head node and enter a hotel room (aka, a HPC job). 
 
@@ -166,7 +163,7 @@ When you are finished installing your packages type `q()` to exit R and then `lo
 
 Congratulations, you've just successfully submitted an interactive HPC job to use R.
 
-## HPC jobs
+# HPC jobs
 
 There are two main types of jobs you can submit to HPC; interactive and batch jobs. Interactive jobs provide you with an interactive R session like what you are familiar with now. **NOTE:** *You will need to have your interactive session open for the job to continue.* Batch jobs are intended for jobs that will need to run for longer, or when multiple jobs need to be submitted. Unlike interactive
 jobs, after you submit a batch job, you can close your connection to HPC altogether (and even shut your local computer down) without affecting the jobs processing on the HPC.
@@ -177,16 +174,16 @@ We've already learned how to submit interactive jobs, but these can be a little 
 
 We've already learned how to submit interactive jobs, but these can be a little cumbersome, as we need to manually type all our commands into R. What if we had an R script that we'd like to run on the HPC. Of course, first we need to load the R script into your personal HPC directory; I do this via the mounted drive on my local computer.
 
-To submit an R script, we must write a corresponding `.sub` script which specifies the computational resources we'll require and what we'd like to run. These `.sub` files are written using Unix code. Below is an example. 
+To submit an R script, we must write a corresponding `.sub` script which specifies the computational resources we need and what we'd like to run. These files, written in Unix code, have many names, but in this manual you can think of them as configuration files. Below is an example. 
 
 ```{bash, eval = FALSE, attr.source='.numberLines'}
-#!/bin/bash -l
-#PBS -N myfile 				      // NAME of job on lyra
-#PBS -l ncpus=1 			      // number of cores
-#PBS -l mem=2GB 			      // memory allocation for job
-#PBS -l walltime=1:00:00	  // time allocation for job
-#PBS -e myjob_errors        // where to save the error file
-#PBS -o myjob_output        // where to save the output file 
+#!/bin/bash -l					// The Shebang - don't ask me why!
+#PBS -N myfile 				    // NAME of job on lyra
+#PBS -l ncpus=1 			    // number of cores
+#PBS -l mem=2GB 			    // memory allocation for job
+#PBS -l walltime=1:00:00	    // time allocation for job
+#PBS -e myjob_errors            // where to save the error file
+#PBS -o myjob_output            // where to save the output file 
 ```
 
 **NOTE:** *Do not include the backslashes and comments, these cause headaches for Unix. I have included them for instructional purposes only.*
@@ -208,17 +205,17 @@ n9401849@lyra01:~> qsub myfile.sub
 5059221.pbs
 ```
 
-By running `qsub <sub_file>`, we tell the PBS system to read the file for both the computational resources we required and the code we wish to run. When running a single `.sub` file, the PBS will acknowledge your request for a job by printing a unique PBS number. In the example above this is `5059221.pbs`. If you do not see a unique PBS number, then there is something wrong with your `.sub` file.    
+By running `qsub <sub_file>`, we tell the PBS system to read the file for (1) the computational resources we required and (2) the code we wish to run. When running a single `.sub` file, the PBS will acknowledge your request for a job by printing a unique Job ID. In the example above this is `5059221.pbs`. If you do not see a Job ID, then there is something wrong with your `.sub` file.    
 
 ## Monitoring the status of jobs
 
-The below command provides a summary of the current jobs and their status. 
+To monitor the status of your submitted jobs run the following command. 
 
 ```{bash eval = FALSE}
-qstat -u n9401849
+qstat -u <your_qut_id>
 ```
 
-The monitoring screen looks like this,
+where you replace `<your_qut_id>` with your number. This command will provide an output like this. 
 
 ```{bash eval = FALSE}
 n9401849@lyra01:~> qstat -u n9401849
@@ -231,9 +228,24 @@ Job ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S 
 5005628.pbs          n9401849 quick    asra1_CHD*    --    1   1    2gb 01:00 Q   --
 ```
 
-where most of the columns are not particularly helpful (at least for beginners). The columns we're interested in are the `Req'd Memory` and `Req'd Time` columns which give the amount of memory and time requested in your bash script. If these don't look right, stop the job. We'll show you how to stop jobs later, but note that you'll need to know the `Job ID` to do so.  
+To understand this output I'll describe each column in turn. Some of these you may be able to guess anyway!
+- `Job ID`: The unique job ID provided by the PBS. 
+- `Username`: Your QUT username that you used to log into the HPC system. 
+- `Queue`: Based on the computational resources you requested, the PBS categorizes the job using simple descriptive language. For the example above, where we only requested 1 hour of Walltime, the PBS has assigned this job `quick`. Other options include `long`.  
+- `Jobname`: The assigned job name that we fed to the HPC via the second line of the `.sub` file. 
+- `SessID`: NA
+- `NDS`: Number of cores requested
+- `TSK`: NA
+-`Req'd Memory`: memory allocation for job
+- `Req'd Time`: time allocation for job
+- `S`: Status of the job. Options include `Q` (queued), `R` (running) and `E` (elapsed). 
+- `Elap Time`: Elapsed time for the job. Only shows a value once `S` = `R`. Once `Elap Time` is equal to `Req'd Time` the job stops --- regardless if it has finished or not! For this reason it is always best to slightly overestimate the run time of your models.
 
-The other column to be interested in is the `Elap Time` column. Once your job has started (indicated by the `S` column showing `R` for that job) the elapsed time column shows how long the job has been running for. Once `Elap Time` is equal to `Req'd Time` the job stops --- regardless if it has finished or not! For this reason it is always best to slightly overestimate the run time of your models.
+If some of these values don't look right, stop the job and edit your configuration file accordingly before resubmitting. To stop a queued job, run
+
+```{bash, eval = FALSE}
+qdel <jobid> // include the .pbs at the end
+``` 
 
 When your models are running the `qstat` call will look like this.  
 
@@ -246,17 +258,27 @@ Job ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S 
 -------------------- -------- -------- ---------- ------ --- --- ------ ----- - -----
 5005629.pbs          n9401849 quick    asra1_Ast*  47118   1   1    2gb 01:00 R 00:01
 5005630.pbs          n9401849 quick    asra1_CHD*  47168   1   1    2gb 01:00 R 00:01
-````
+```
 
-## Choosing `walltime` and `mem`
+In practice, most of the time you're use of the HPC head node will be to monitor your jobs, so ensure your accustumed to the `qstat` command. 
 
-Walltime is the total amount of time it will take to complete your job. This includes loading packages, data, compiling the model, summarising and saving. You must leave sufficient time for all these tasks to be complete as the HPC will stop the job once the `walltime` has been met. Like most of our scripts, the last job is always to save our results... this is often the task that can be 
+### Choosing `walltime` and `mem`
 
-## Understanding the output file
+There is a real art in setting memory and walltime values when running jobs on the HPC.
 
-Here is an example of the corresponding output file that lyra creates when a job has stopped. In (almost!) all cases, lyra will create an output and error file regardless of whether the job was successful. Generally when I refer to success I mean the R script finished running and the required files were successfully saved.  
+Walltime is the total amount of time it will take to complete your job. This includes loading packages, data, compiling, fitting and summarising the model, and saving any output. You must leave sufficient time for all these tasks to be complete as the HPC will stop the job once the `walltime` has been met. Like most of our scripts, the last commands are always to save our results. To avoid running models for days and then having the results discarded it is best practice to save model results earlier in your scripts if possible. If you wish to save space, you can always tell R at the very end of your script to delete a file. To help guess how long a model will take, I recommend making use of the `jf$MCMCrecommendations` function which allows one to approximate the run time of a model based on a shorter run of the same model. Of course, this function is an approximation to the run time of the model **only**, it cannot indicate how long model saving or summarising will take. 
 
-```{bash eval=FALSE}
+Setting the memory value is argueable more difficult. Unlike your local R session which will just run slower if it exceeds your memory, the HPC will just end your job --- loosing any modelling done up to that point. To avoid this, it is best practice to run your models with a high value of memory (say 10GB) to start with and then reduce this as necessary. You might think that just setting memory very high is the pragmatic solution. **Please don't do this!** Firstly, by asking for computational resources you don't need, you slow the HPC down for everyone. Secondly, by requesting large amounts of memory can make it take substantially longer for the PBS to allocate you a job. For example, if you request 100GB, you might have to wait an hour for the PBS to allocate you a job.
+
+In R you can assess the size of your objects (say your `draws` or `fit` objects) using `format(object.size(<object_name>), units = "Mb")`. Remember that R holds all objects in memory. Thus, by summing the size of all the ("large") objects that you'll need to have simulateonusly avialable in R, you can glean an initial approximation to the memory value you should specify in your configuration `.sub` file. 
+
+I find that an iterative process for deciding walltime and memory is most efficient. First, set a reasonably large value for both to begin. After a successful HPC job is complete, the output and error files (which I describe in the next section) provide detailed information about the computational resources it **actually** needed, irrespective of what you requested. By viewing these values, you can find an optimal upper bound for both values.  
+
+### Understanding the output file
+
+Here is an example of the corresponding output file that lyra creates when a job has ended. In (almost!) all cases, lyra will create an output and error file regardless of whether the job was successful. Generally when I refer to success I mean the R script finished running and the required files were successfully saved.  
+
+```{bash eval=FALSE, attr.source='.numberLines'}
 R version 4.0.3 (2020-10-10) -- "Bunny-Wunnies Freak Out"
 Copyright (C) 2020 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
@@ -303,9 +325,11 @@ Wall time : 00:05:50
 Mem usage : 2097152kb
 ```
 
-## Understanding the error file
+The output file is very useful in determining the computational resources that were **actually** used by the HPC during the running of the job. These details are available from line 41 above. Note that CPU time and walltime are unique metrics. We're only interested in the walltime as this is what we actually set in the configuration file. In the example above, the HPC job ended after 5 mins and 50 seconds and used 2.097152 Gb of memory. Using the iterative method proposed above, we might consider setting the memory at 3GB and the walltime at 10 mins. 
 
-Here is an example of the corresponding error file that corresponds to a specific job. 
+### Understanding the error file
+
+Here is an example of the error file a successful HPC job where we ran a simple `nimble` model. 
 
 ```{bash eval=FALSE}
 ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──
@@ -379,9 +403,9 @@ Progress ... -> Standard errors...
 Progress ... -> Highest density intervals...
 ```
 
-As you can observe this provides some of the output from `R` like you would see in `Rstudio` on your local machine. 
+Unlike the output file, the error file is useful for diagnosing errors produced by R during the HPC job. This is becuase the output file provides some of the output from `R` like you would see in `Rstudio` on your local machine. 
 
-The examples above are for successful jobs. Below is an example error script when a job is stopped early due to an error in `R`. 
+Below is an example error file for when a job is stopped early due to an `R` error. 
 
 ```{bash eval=FALSE}
 ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──
@@ -429,11 +453,11 @@ In file(filename, "r", encoding = encoding) :
 Execution halted
 ```
 
-In the above example, the job was stopped early due to a directory issue. 
+As you can see, the job was stopped early due to a directory issue. 
 
-## Incorrect memory allocation
+### Understanding Lyra errors
 
-In the error file you might see this line.
+Hopefully you now understand the power of the error and output files produced by lyra. Fortunately lyra also produces helpful output when jobs are stopped due to exceeded computational resources. If your memory allocation is exceeded, you might observe the following line in the error file.
 
 ```{bash, eval = FALSE}
 /var/spool/PBS/mom_priv/jobs/5059208.pbs.SC: line 23: 47174 Killed
@@ -447,11 +471,8 @@ Mem usage : 2097152kb
 
 which has clearly exceeded the memory of 2GB we set. Remember there are 1 million kb in a GB. 
 
-## Incorrect time allocated
 
-Sometimes you might underestimate how long your model will take to run, resulting in the HPC stopping your job before it's done. 
-
-In the error file you will see something like 
+If you job has continued to run past its allocated walltime, the PBS will automatically stop the job. In this case, the error file might say 
 
 ```{bash, eval = FALSE}
 =>> PBS: job killed: walltime 77 exceeded limit 60
@@ -467,11 +488,87 @@ Mem usage : 1029864kb
 
 which clearly shows that we've exceeded the time limit we set of 1 minute. 
 
-## Other errors
-
 Sometimes an error will occur that is unique and potentially one that cannot be described in the standard error and output files. In these instances you will receive an automated email from the HPC system that may look like this.
 
-![alt text here](imgs/EmailErrorHPC.png)
+![](imgs/EmailErrorHPC.png)
 
-If this happens please contact me. In most cases, these are a result of an error in the HPC system.  
+If this happens please contact me. In most cases, this is a result of an error in the HPC system. 
+
+# Batch running of jobs
+
+## Basic Unix code - again
+
+```{bash, eval = FALSE, attr.source='.numberLines'}
+#!/bin/bash
+
+base_folder='QUTHPC_training/batch'
+
+# Model
+for model_spec in asra1 asra2 ## Name of file that runs the model
+do
+	
+	# Sex
+	for sex in Persons Female Male
+	do
+	
+		# Condition
+		for condition in Asthma CHD
+		do
+	
+			# create the unique file name
+			Rfile=$model_spec'_'$condition'_'$sex
+	
+			# get the current date
+			cur_date=$(date +%Y%m%d)
+		
+			# create directories
+			mkdir -p $base_folder/sub_src/$cur_date
+			mkdir -p $base_folder/outputs/lyra
+			mkdir -p $base_folder/outputs/lyra/$cur_date/errors
+			mkdir -p $base_folder/outputs/lyra/$cur_date/out
+			mkdir -p $base_folder/outputs/$condition
+			mkdir -p $base_folder/outputs/$condition/$sex
+			
+			# Set loop output file with full directory
+			loop_output_file=$base_folder'/outputs/'$condition'/'$sex'/'$Rfile
+
+			# create the unique .sub script files
+			file=$Rfile'.sub'
+
+			# paste the commands in the .sub scripts
+			cat > $base_folder/sub_src/$cur_date/$file <<EOF
+#!/bin/bash -l
+#PBS -N $Rfile
+#PBS -l ncpus=1
+#PBS -l mem=2GB
+#PBS -l walltime=0:20:00
+#PBS -e $base_folder/outputs/lyra/$cur_date/lyra_errors/$Rfile
+#PBS -o $base_folder/outputs/lyra/$cur_date/lyra_out/$Rfile
+
+module load r/4.0.3-foss-2020b
+module load gdal/3.2.1-foss-2020b
+
+R -e ".libPaths('r_lib');
+base_folder='$base_folder';
+loop_output_file='$loop_output_file';
+model_spec='$model_spec';
+sex='$sex';
+condition='$condition';
+cur_date='$cur_date';
+niter=800;
+nburnin=400;
+thin=1;
+nchains=4;
+source('$base_folder/ms.R');"
+EOF
+
+			# run each script
+			qsub $base_folder/sub_src/$cur_date/$file
+
+		done
+	done
+done
+```
+
+ 
 
