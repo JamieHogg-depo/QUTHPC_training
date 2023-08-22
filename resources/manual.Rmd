@@ -260,7 +260,7 @@ Job ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S 
 5005630.pbs          n9401849 quick    asra1_CHD*  47168   1   1    2gb 01:00 R 00:01
 ```
 
-In practice, most of the time you're use of the HPC head node will be to monitor your jobs, so ensure your accustumed to the `qstat` command. 
+In practice, most of the time you're use of the HPC head node will be to monitor your jobs, so ensure your accustomed to the `qstat` command. 
 
 ### Choosing `walltime` and `mem`
 
@@ -403,7 +403,7 @@ Progress ... -> Standard errors...
 Progress ... -> Highest density intervals...
 ```
 
-Unlike the output file, the error file is useful for diagnosing errors produced by R during the HPC job. This is becuase the output file provides some of the output from `R` like you would see in `Rstudio` on your local machine. 
+Unlike the output file, the error file is useful for diagnosing errors produced by R during the HPC job. This is because the output file provides some of the output from `R` like you would see in `Rstudio` on your local machine. 
 
 Below is an example error file for when a job is stopped early due to an `R` error. 
 
@@ -469,7 +469,7 @@ While in the output file you might see
 Mem usage : 2097152kb
 ```
 
-which has clearly exceeded the memory of 2GB we set. Remember there are 1 million kb in a GB. 
+which has clearly exceeded the memory of 2GB we set. Remember there are 1 million kB in a GB. 
 
 
 If you job has continued to run past its allocated walltime, the PBS will automatically stop the job. In this case, the error file might say 
@@ -496,7 +496,9 @@ If this happens please contact me. In most cases, this is a result of an error i
 
 # Batch running of jobs
 
-## Basic Unix code - again
+So far, we've described running a single R script (or a single job) on the QUT HPC. In this section, we'll descibe how Unix code can be used to create **and** run multiple jobs simulatenously. For example, we might wish to run the all combinations of the models, sexes and conditions. Using Unix code, we can achieve this with a single call. 
+
+First though, we must define a new file type, called a `.sh` file, thats purposes is to create and submit `.sub` files to the PBS. Below is a complex example of a `.sh` file, which I will guide you through. 
 
 ```{bash, eval = FALSE, attr.source='.numberLines'}
 #!/bin/bash
@@ -570,5 +572,34 @@ EOF
 done
 ```
 
- 
+To define every unique combination of models, sexes and conditions, we define three nested for loops. These are visible in lines 6-7, 10-11 and 14-15. The loops are closed on lines 67-68. Just like in R, the 'for-loop' syntax in Unix defines creates a dynamic variable which takes on a new value for each round. Consider the 'for-loop' defined on line 6. Here the variable `model_spec` takes on the value `asra1` for the first round and then `asra2` for the second. To reference a dynamic variable in Unix, we use `$model_spec`. 
 
+After defining the for loops, we create a unique file name, called `Rfile`, on line 18. This is created by joining the dynamic variables defined in the 'for-loops'. For the first loop `Rfile` will equal
+
+```{bash, eval = FALSE}
+asra1_Asthma_Persons
+```
+
+Line 21 gives the current date. This is useful to document our error and output files from Lyra. Following this, from lines 24 to 29 we create a variety of directories (using the `mkdir -p` command) into which our `.sub` files and results will be saved.  
+
+Then in lines 32 and 35, we create additional dynamic variables that will be used later. For the first loop `loop_output_file` will be equal to
+
+```{bash, eval = FALSE}
+QUTHPC_training/batch/outputs/Asthma/Persons/asra1_Asthma_Persons
+```
+
+which is actually very convenient because when we run our R model later, we can call `loop_output_file` rather than referring to each of the dynamic variables in the 'for-loops'. 
+
+Lines 39-61 should (hopefully!) look familiar to you. This is where we dynamically create the `.sub` scripts that are specific to the 'for-loop'. The code on either side of this (line 38 and 62) is just the Unix code required to create a file. Please observe how frequently we call the dynamic variables we've created in the code prior. The constant use of `$<variable>` should make this obvious. 
+
+Line 65 should also be familiar. It takes the `.sub` file created by the `.sh` file and then creates a corresponding HPC job. 
+
+Now that we have created a `.sh` script, we can run it on the Lyra head node using 
+
+```{bash, eval = FALSE}
+bash <file_name>.sh
+```
+
+If the file has been correctly setup, the PBS will provide a list of new Job IDs for all the submitted jobs. In the example above, this would be a list of 12. 
+
+I hope your impressed! By using a `.sh` script, we are able to run many jobs simultaenously using a single line of code. Furthermore, we can now close our connection to Lyra, feeling confident that our models will continue to run without us. 

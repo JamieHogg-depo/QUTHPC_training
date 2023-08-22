@@ -271,10 +271,7 @@ pre code {
 <li><a href="#understanding-lyra-errors">Understanding Lyra errors</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#batch-running-of-jobs">Batch running of jobs</a>
-<ul>
-<li><a href="#basic-unix-code---again">Basic Unix code - again</a></li>
-</ul></li>
+<li><a href="#batch-running-of-jobs">Batch running of jobs</a></li>
 </ul>
 </div>
 
@@ -437,7 +434,7 @@ pre code {
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="ex">--------------------</span> <span class="at">--------</span> <span class="at">--------</span> <span class="at">----------</span> <span class="at">------</span> <span class="at">---</span> <span class="at">---</span> <span class="at">------</span> <span class="at">-----</span> <span class="at">-</span> <span class="at">-----</span></span>
 <span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="ex">5005629.pbs</span>          n9401849 quick    asra1_Ast<span class="pp">*</span>  47118   1   1    2gb 01:00 R 00:01</span>
 <span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="ex">5005630.pbs</span>          n9401849 quick    asra1_CHD<span class="pp">*</span>  47168   1   1    2gb 01:00 R 00:01</span></code></pre></div>
-<p>In practice, most of the time you’re use of the HPC head node will be to monitor your jobs, so ensure your accustumed to the <code>qstat</code> command.</p>
+<p>In practice, most of the time you’re use of the HPC head node will be to monitor your jobs, so ensure your accustomed to the <code>qstat</code> command.</p>
 <div id="choosing-walltime-and-mem" class="section level3">
 <h3>Choosing <code>walltime</code> and <code>mem</code></h3>
 <p>There is a real art in setting memory and walltime values when running jobs on the HPC.</p>
@@ -567,7 +564,7 @@ pre code {
 <span id="cb18-67"><a href="#cb18-67" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Point estimates...</span>
 <span id="cb18-68"><a href="#cb18-68" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Standard errors...</span>
 <span id="cb18-69"><a href="#cb18-69" aria-hidden="true" tabindex="-1"></a><span class="ex">Progress</span> ... <span class="at">-</span><span class="op">&gt;</span> Highest density intervals...</span></code></pre></div>
-<p>Unlike the output file, the error file is useful for diagnosing errors produced by R during the HPC job. This is becuase the output file provides some of the output from <code>R</code> like you would see in <code>Rstudio</code> on your local machine.</p>
+<p>Unlike the output file, the error file is useful for diagnosing errors produced by R during the HPC job. This is because the output file provides some of the output from <code>R</code> like you would see in <code>Rstudio</code> on your local machine.</p>
 <p>Below is an example error file for when a job is stopped early due to an <code>R</code> error.</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="ex">✔</span> ggplot2 3.3.5     ✔ purrr   0.3.4</span>
@@ -620,7 +617,7 @@ pre code {
 <div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/var/spool/PBS/mom_priv/jobs/5059208.pbs.SC:</span> line 23: 47174 Killed</span></code></pre></div>
 <p>While in the output file you might see</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Mem</span> usage : 2097152kb</span></code></pre></div>
-<p>which has clearly exceeded the memory of 2GB we set. Remember there are 1 million kb in a GB.</p>
+<p>which has clearly exceeded the memory of 2GB we set. Remember there are 1 million kB in a GB.</p>
 <p>If you job has continued to run past its allocated walltime, the PBS will automatically stop the job. In this case, the error file might say</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="ex">=</span><span class="op">&gt;&gt;</span> PBS: job killed: walltime 77 exceeded limit 60</span></code></pre></div>
 <p>While in the output file you’ll see</p>
@@ -636,8 +633,8 @@ pre code {
 </div>
 <div id="batch-running-of-jobs" class="section level1">
 <h1>Batch running of jobs</h1>
-<div id="basic-unix-code---again" class="section level2">
-<h2>Basic Unix code - again</h2>
+<p>So far, we’ve described running a single R script (or a single job) on the QUT HPC. In this section, we’ll descibe how Unix code can be used to create <strong>and</strong> run multiple jobs simulatenously. For example, we might wish to run the all combinations of the models, sexes and conditions. Using Unix code, we can achieve this with a single call.</p>
+<p>First though, we must define a new file type, called a <code>.sh</code> file, thats purposes is to create and submit <code>.sub</code> files to the PBS. Below is a complex example of a <code>.sh</code> file, which I will guide you through.</p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode numberSource bash numberLines"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1"></a><span class="co">#!/bin/bash</span></span>
 <span id="cb24-2"><a href="#cb24-2"></a></span>
 <span id="cb24-3"><a href="#cb24-3"></a><span class="va">base_folder=</span><span class="st">&#39;QUTHPC_training/batch&#39;</span></span>
@@ -707,7 +704,19 @@ pre code {
 <span id="cb24-67"><a href="#cb24-67"></a>        <span class="cf">done</span></span>
 <span id="cb24-68"><a href="#cb24-68"></a>    <span class="cf">done</span></span>
 <span id="cb24-69"><a href="#cb24-69"></a><span class="cf">done</span></span></code></pre></div>
-</div>
+<p>To define every unique combination of models, sexes and conditions, we define three nested for loops. These are visible in lines 6-7, 10-11 and 14-15. The loops are closed on lines 67-68. Just like in R, the ‘for-loop’ syntax in Unix defines creates a dynamic variable which takes on a new value for each round. Consider the ‘for-loop’ defined on line 6. Here the variable <code>model_spec</code> takes on the value <code>asra1</code> for the first round and then <code>asra2</code> for the second. To reference a dynamic variable in Unix, we use <code>$model_spec</code>.</p>
+<p>After defining the for loops, we create a unique file name, called <code>Rfile</code>, on line 18. This is created by joining the dynamic variables defined in the ‘for-loops’. For the first loop <code>Rfile</code> will equal</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="ex">asra1_Asthma_Persons</span></span></code></pre></div>
+<p>Line 21 gives the current date. This is useful to document our error and output files from Lyra. Following this, from lines 24 to 29 we create a variety of directories (using the <code>mkdir -p</code> command) into which our <code>.sub</code> files and results will be saved.</p>
+<p>Then in lines 32 and 35, we create additional dynamic variables that will be used later. For the first loop <code>loop_output_file</code> will be equal to</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="ex">QUTHPC_training/batch/outputs/Asthma/Persons/asra1_Asthma_Persons</span></span></code></pre></div>
+<p>which is actually very convenient because when we run our R model later, we can call <code>loop_output_file</code> rather than referring to each of the dynamic variables in the ‘for-loops’.</p>
+<p>Lines 39-61 should (hopefully!) look familiar to you. This is where we dynamically create the <code>.sub</code> scripts that are specific to the ‘for-loop’. The code on either side of this (line 38 and 62) is just the Unix code required to create a file. Please observe how frequently we call the dynamic variables we’ve created in the code prior. The constant use of <code>$&lt;variable&gt;</code> should make this obvious.</p>
+<p>Line 65 should also be familiar. It takes the <code>.sub</code> file created by the <code>.sh</code> file and then creates a corresponding HPC job.</p>
+<p>Now that we have created a <code>.sh</code> script, we can run it on the Lyra head node using</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> <span class="op">&lt;</span>file_name<span class="op">&gt;</span>.sh</span></code></pre></div>
+<p>If the file has been correctly setup, the PBS will provide a list of new Job IDs for all the submitted jobs. In the example above, this would be a list of 12.</p>
+<p>I hope your impressed! By using a <code>.sh</code> script, we are able to run many jobs simultaenously using a single line of code. Furthermore, we can now close our connection to Lyra, feeling confident that our models will continue to run without us.</p>
 </div>
 
 
