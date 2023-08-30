@@ -1,19 +1,23 @@
 ---
-title: "QUT HPC Manual for DOHWA"
-author:
-  name: "By James Hogg (QUT) - 2023"
+title: "Manual for Queensland University of Technology (QUT) High Performance Computer (HPC)"
+subtitle: "Prepared for the Department of Health Western Australia (DOHWA)"
+author: "James Hogg"
+date: 2023
 output:
   pdf_document:
     latex_engine: xelatex
     toc: true
     highlight: tango
 urlcolor: blue
+sansfont: Calibri Light
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tinytex)
 ```
+
+\newpage
 
 This document stands as an introduction for staff at the Department of Health Western Australia to successfully operate the Queensland University of Technologies (QUT) High Performance Computing (HPC) system. This manual is relatively specific to the Bayesian modelling project. For a more general manual we strongly recommend the HPC guide written by Ethan Goan (a current QUT PhD student). His guide is available in the `resources\Other_resources` folder in this repository. 
 
@@ -27,23 +31,24 @@ The QUT HPC facilities provide access to a large amount of high quality computat
 - 24 Tesla GPUs
 - Visualisations services and more
 
-Before beginning I should highlight some limitations of this manual and my skillset in operating and diagnosing HPC problems. I am not programmer or computer scientist. Most of my knowledge of the HPC is highly specific to my use cases. For this reason, I often refer to stack Overflow and (more recently) ChatGPTP for help. As your HPC processes become more specialised and complicated, you'll begin to see the benefits in using these resources. 
+Note this manual is introductory, and useful troubleshooting resources for the HPC include Stack Overflow and ChatGPT. 
 
 # Accessing the HPC 
 
 Open Command Prompt (from your computers search bar) and type
 
 ```{bash, eval=FALSE}
-ssh <your_qut_id>@lyra.qut.edu.au
+ssh <your_qut_id>@lyra.qut.edu.au   # generic
+ssh n1234567@lyra.qut.edu.au        # specific example
 ```
 
-where you will replace `<your_qut_id>` with your personal QUT ID. Then hit ENTER. The console will then prompt you to enter your password. 
+where you will replace `<your_qut_id>` with your personal QUT ID. The specific example above uses `n1234567`. By hitting ENTER the console will then prompt you to enter your password. 
 **IMPORTANT**: *While typing your password, the console will not show you any dots. It will appear as if the console is not recognizing that you're inputting your password. Be assured that it is!* 
 
 Once you've typed you password and hit ENTER you will now be inside the Lyra head node. Your screen might look something like the one below. 
 
 ```{bash, eval=FALSE}
-C:\Users\n9401849>ssh n9401849@Lyra.qut.edu.au
+C:\Users\n1234567>ssh n1234567@Lyra.qut.edu.au
 * ============================================================================ +
 * Access to this computer system is only for authorised QUT staff and students *
 * and external persons authorised by QUT.                                      *
@@ -58,7 +63,7 @@ C:\Users\n9401849>ssh n9401849@Lyra.qut.edu.au
 
 + --------- Please login using your QUT Access Username and Password --------- +
 
-n9401849@Lyra.qut.edu.au's password:
+n1234567@Lyra.qut.edu.au's password:
 Last login: Tue Aug 15 04:44:18 2023 from 172.26.218.129
 
 
@@ -84,12 +89,12 @@ Last login: Tue Aug 15 04:44:18 2023 from 172.26.218.129
          *                     °
 
 Available walltime until next scheduled maintenance window: 531:4:59
-n9401849@Lyra01:~>
+n1234567@Lyra01:~>
 ```
 
 The Lyra head node is what I call the "entrance" to the HPC. Think of it like the lobby of a hotel: you don't spend much time there or do anything considerable (like running a model!), but you have to go through it each time you wish to enter or leave your room. Furthermore if you'd like to change your room or make a request (submit a job to the HPC) you have to go to the lobby to do so (at least before we had phones!). 
 
-Note that the leading `n9401849@Lyra01:~>` in the console is often called the *shell prompt*. It typically displays information about the current user and the host name of the machine. This is where you will type your code.
+Note that the leading `n1234567@Lyra01:~>` in the console is often called the *shell prompt*. It typically displays information about the current user and the host name of the machine. This is where you will type your code.
 
 ## Some basic Unix code
 
@@ -112,11 +117,13 @@ module load r/4.0.3-foss-2020b
 R
 ``` 
 
-You should see the normal R information printed to your console. To return to the head node, just type `q()`. **NOTE**: *It is generally ill-advised to access software directly in the head node as it can make everyones HPC experience slower (don't be that person!). The head node is not a powerful computer and should only be used to submit jobs!*
+You should see the normal R information printed to your console. To return to the head node, just type `q()`. **NOTE**: *It is generally ill-advised to access software directly in the head node as it can make everyone's HPC experience slower (don't be that person!). The head node is not a powerful computer and should only be used to submit jobs!*
 
-You'll notice that we ran a strange command starting with `module load `. Modules are pieces of software that are available from the QUT HPC - there are absolutely loads of these! If all were loaded every time we opened Lyra, we would be waiting for a *long* time. Instead, we have to tell Lyra what modules we'd like to use. In the example above I told Lyra that I would like to use R version 4.0.3. At the time of writing, this is the most recent version of R available to HPC users.  
+You'll notice that we ran a strange command starting with `module load `. Modules are pieces of software that are available from the QUT HPC - there are absolutely loads of these! If all were loaded every time we opened Lyra, we would be waiting for a *long* time. Instead, we have to tell Lyra what modules we'd like to use. In the example above I told Lyra that I would like to use R version 4.0.3. At the time of writing, this is the most recent version of R available to HPC users. Note that `foss` stands  for "Free and Open Source Software" and `2020b` denotes the year and specific release of R.   
 
-# Your first HPC job - installing R packages
+# Your first HPC job
+
+## Installing R packages
 
 As you might expect loading the R module only loads base R packages. To install R packages you'll need to exit the Lyra head node and enter a hotel room (aka, a HPC job). 
 
@@ -139,16 +146,16 @@ only asks for 20 minutes of computational resources.
 Once you type the code above, you should see a printout similar to below. 
 
 ```{bash, eval = FALSE}
-n9401849@Lyra01:~> qsub -I -S /bin/bash -l walltime=1:00:00,ncpus=1,mem=2gb
+n1234567@Lyra01:~> qsub -I -S /bin/bash -l walltime=1:00:00,ncpus=1,mem=2gb
 qsub: waiting for job 5030193.pbs to start
 qsub: job 5030193.pbs ready
 
-n9401849@cl4n007:~>
+n1234567@cl4n007:~>
 ```
 
-This indicates that you are now inside a "node" of the HPC that will automatically exit (aka shutdown) after 1 hour. Notice how the prefix to the `~>` symbol has changed from `n9401849@Lyra01:` (the head node) to `n9401849@cl4n007:` (the job). 
+This indicates that you are now inside a "node" of the HPC that will automatically exit (aka shutdown) after 1 hour. Notice how the prefix to the `~>` symbol has changed from `n1234567@Lyra01:` (the head node) to `n1234567@cl4n007:` (the job). 
 
-Returning to the task at hand, we'd like to run some R code. Using what we just learned we load the R module and open R. 
+Returning to the task at hand, we'd like to run some R code. Using what we just learnt we load the R module and open R. 
 
 As you might expect the permissions on the HPC are strict and confusing. You **CANNOT** install R packages into the root directory. If you try, R will send a series of errors your way. Instead, you must create a new folder in your personal directory (on the HPC) to hold your R packages.  I've called my folder `r_lib`. You can create your folder in the usual way (via the mounted drive on your local computer), by running
 
@@ -213,7 +220,7 @@ The example above is extremely simple. On lines 1 and 2 we load the R module and
 Instead, we tell R to run the entire `ms.R` script. Now that we have successfully written a `.sub` file, we can use it to create a HPC job. 
 
 ```{bash, eval = FALSE}
-n9401849@Lyra01:~> qsub myfile.sub
+n1234567@Lyra01:~> qsub myfile.sub
 5059221.pbs
 ```
 
@@ -230,14 +237,14 @@ qstat -u <your_qut_id>
 Of course in practice you will replace `<your_qut_id>` with your QUT ID number. This command will provide an output structured like this. 
 
 ```{bash eval = FALSE}
-n9401849@Lyra01:~> qstat -u n9401849
+n1234567@Lyra01:~> qstat -u n1234567
 
 pbs:
                                                                  Req'd  Req'd   Elap
 Job ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S Time
 -------------------- -------- -------- ---------- ------ --- --- ------ ----- - -----
-5005627.pbs          n9401849 quick    asra1_Ast*    --    1   1    2gb 01:00 Q   --
-5005628.pbs          n9401849 quick    asra1_CHD*    --    1   1    2gb 01:00 Q   --
+5005627.pbs          n1234567 quick    asra1_Ast*    --    1   1    2gb 01:00 Q   --
+5005628.pbs          n1234567 quick    asra1_CHD*    --    1   1    2gb 01:00 Q   --
 ```
 
 I describe each column below. Some of these you may be able to guess anyway!
@@ -263,14 +270,14 @@ qdel <jobid> // include the .pbs at the end
 When your models are running the `qstat` call will look like this.  
 
 ```{bash eval=FALSE}
-n9401849@Lyra01:~> qstat -u n9401849
+n1234567@Lyra01:~> qstat -u n1234567
 
 pbs:
                                                                  Req'd  Req'd   Elap
 Job ID               Username Queue    Jobname    SessID NDS TSK Memory Time  S Time
 -------------------- -------- -------- ---------- ------ --- --- ------ ----- - -----
-5005629.pbs          n9401849 quick    asra1_Ast*  47118   1   1    2gb 01:00 R 00:01
-5005630.pbs          n9401849 quick    asra1_CHD*  47168   1   1    2gb 01:00 R 00:01
+5005629.pbs          n1234567 quick    asra1_Ast*  47118   1   1    2gb 01:00 R 00:01
+5005630.pbs          n1234567 quick    asra1_CHD*  47168   1   1    2gb 01:00 R 00:01
 ```
 
 Most of the time, your use of the HPC head node will be to monitor your jobs, so ensure you're accustomed to the `qstat` command. 
@@ -283,7 +290,7 @@ Walltime is the total amount of time it will take to complete your job. This inc
 
 To help guess how long a model will take, I recommend making use of the `jf$MCMCrecommendations` function which allows one to approximate the run time of a model based on a shorter run of the same model. Of course, this function is an approximation to the run time of the model *only*, it cannot indicate how long model summarising or saving will take. 
 
-Unfortunately, setting the memory value is argueable more difficult. Unlike your local R session which will just run slower if it exceeds your memory, the HPC will just end your job --- discarding any modelling done up to that point. To avoid this, it is best practice to run your models with a high value of memory (say 10GB) to start with and then reduce this as necessary. 
+Unfortunately, setting the memory value is arguably more difficult. Unlike your local R session which will just run slower if it exceeds your memory, the HPC will just end your job --- discarding any modelling done up to that point. To avoid this, it is best practice to run your models with a high value of memory (say 10GB) to start with and then reduce this as necessary. 
 
 You might think that just setting memory very high is the pragmatic solution. **Please don't do this!** Firstly, by asking for computational resources you don't need, you slow the HPC down for everyone. Secondly, requesting large amounts of RAM (memory) will make it take substantially longer for the PBS to allocate you a job. For example, if you request 100GB, you might have to wait an hour for the PBS to allocate you this job.
 
@@ -497,7 +504,7 @@ Mem usage : 2097152kb
 which has clearly exceeded the memory of 2GB we requested in the `.sub` file. Remember there are 1 million kB in a GB. 
 
 
-If you job has continued to run past its allocated walltime, the PBS will automatically stop the job. In this case, the error file might say 
+If your job has continued to run past its allocated walltime, the PBS will automatically stop the job. In this case, the error file might say 
 
 ```{bash, eval = FALSE}
 =>> PBS: job killed: walltime 77 exceeded limit 60
@@ -521,7 +528,7 @@ If this happens please contact me. In most cases, this is a result of an error i
 
 # Batch running of jobs {#batch}
 
-So far we've described running a single R script (or a single job) on the QUT HPC. In this section, we'll descibe how Unix code can be used to create *and* run multiple jobs simultaneously. For example, we might wish to run all combinations of the models, sexes and conditions. Using Unix code, we can achieve this with a single command. 
+So far we've described running a single R script (or a single job) on the QUT HPC. In this section, we'll describe how Unix code can be used to create *and* run multiple jobs simultaneously. For example, we might wish to run all combinations of the models, sexes and conditions. Using Unix code, we can achieve this with a single command. 
 
 First though, we must define a new file type, called a shell script (`.sh` file), that's purpose is to create and submit `.sub` files to the PBS. Below is a complex example of a shell script, which I will guide you through. 
 
@@ -627,6 +634,6 @@ bash <file_name> // include the .sh at the end
 
 Please observe the new command we've used; the `bash` command. This command is coupled with a `.sh` script, just like the `qsub` command is coupled with a `.sub` script. If the `.sh` script has been correctly setup, upon running the `bash` command the PBS will provide a list of new Job IDs for all the submitted jobs. In the example above, this would be a list of 12. 
 
-I hope you're impressed! By using a `.sh` script, we are able to run many jobs simultaneously using a single line of code. Furthermore, we can now close our connection to Lyra, feeling confident that our models will continue to run without us. 
+I hope you're impressed! By using a `.sh` script, we can run many jobs simultaneously using a single line of code. Furthermore, we can now close our connection to Lyra, feeling confident that our models will continue to run without us. 
 
 If the jobs were successful you'll be able to find your results in your personal HPC directory, as specified in the `.sh` script. 
