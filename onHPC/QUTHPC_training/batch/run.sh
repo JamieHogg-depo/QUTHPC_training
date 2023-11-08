@@ -18,14 +18,12 @@ do
 			Rfile=$model_spec'_'$condition'_'$sex
 	
 			# get the current date
-			cur_date=$(date +%Y%m%d)
+			cur_date=$(date +%Y%m%d%H%M)
 		
 			# create directories
 			mkdir -p $base_folder/sub_src/$cur_date
-			mkdir -p $base_folder/outputs/lyra
 			mkdir -p $base_folder/outputs/lyra/$cur_date/errors
 			mkdir -p $base_folder/outputs/lyra/$cur_date/out
-			mkdir -p $base_folder/outputs/$condition
 			mkdir -p $base_folder/outputs/$condition/$sex
 			
 			# Set loop output file with full directory
@@ -41,8 +39,8 @@ do
 #PBS -l ncpus=1
 #PBS -l mem=2GB
 #PBS -l walltime=0:20:00
-#PBS -e $base_folder/outputs/lyra/$cur_date/lyra_errors/$Rfile
-#PBS -o $base_folder/outputs/lyra/$cur_date/lyra_out/$Rfile
+#PBS -e $base_folder/outputs/lyra/$cur_date/errors/$Rfile
+#PBS -o $base_folder/outputs/lyra/$cur_date/out/$Rfile
 
 module load r/4.0.3-foss-2020b
 module load gdal/3.2.1-foss-2020b
