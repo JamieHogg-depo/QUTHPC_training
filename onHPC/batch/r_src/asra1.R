@@ -47,7 +47,7 @@ mod <- jf$runNimble(code = code,
                            nchains = nchains)
 						   
 # Save mod object					   
-saveRDS(mod, file = paste0(base_folder, "/outputs/", condition, "/", Rfile, "_mod.rds"))
+saveRDS(mod, file = paste0(loop_output_file, "_mod.rds"))
 
 # Summarise object 
 fit <- jf$sumNimble(mod)
@@ -102,19 +102,19 @@ ggplot(aes(y = y, x = fitt))+
        x = "Fitted values")
 	   
 # save convergence plots
-saveRDS(mf_cv_ll, file = paste0(base_folder, "/outputs/", condition, "/", Rfile, "_convergence.rds"))
+saveRDS(mf_cv_ll, file = paste0(loop_output_file, "_convergence.rds"))
 						   
 ## Summarise draws ## ---------------------------------------------------------
 
 results1 <- jf$getResultsData(fitted_draws, 
                               model = paste0(condition, "_", sex), 
                               metric = "standard")
-saveRDS(results1, file = paste0(base_folder, "/outputs/", condition, "/", Rfile, "_results1.rds"))
+saveRDS(results1, file = paste0(loop_output_file, "_yll.rds"))
 							
 results2 <- jf$getResultsData(exp(fitted_draws), 
                               model = paste0(condition, "_", sex), 
                               metric = "exponentiated")
-saveRDS(results2, file = paste0(base_folder, "/outputs/", condition, "/", Rfile, "_results2.rds"))
+saveRDS(results2, file = paste0(loop_output_file, "_asyll.rds"))
 
 ## END SCRIPT ## --------------------------------------------------------------
 

@@ -1,0 +1,12 @@
+#!/bin/bash -l
+#PBS -N myfile
+#PBS -l ncpus=1
+#PBS -l mem=20GB
+#PBS -l walltime=2:00:00
+#PBS -e QUTHPC_training/single/outputs/lyra/error
+#PBS -o QUTHPC_training/single/outputs/lyra/out
+
+module load r/4.0.3-foss-2020b
+module load gdal/3.2.1-foss-2020b
+
+R -e "source('QUTHPC_training/single/ms.R')"
